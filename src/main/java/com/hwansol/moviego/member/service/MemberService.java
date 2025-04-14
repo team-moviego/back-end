@@ -20,6 +20,19 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     /**
+     * 아이디 중복 확인 서비스
+     *
+     * @param userId - 사용할 아이디
+     */
+    public void duplicatedId(String userId) {
+        boolean isDuplicated = memberRepository.existsByUserId(userId);
+
+        if (!isDuplicated) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_ID);
+        }
+    }
+
+    /**
      * 회원 조회 서비스
      *
      * @param userId 조회할 회원 아이디
