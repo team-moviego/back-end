@@ -32,15 +32,4 @@ public class MemberSignupDto {
         private String userEmail;
     }
 
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    @Builder(toBuilder = true)
-    public static class Response {
-
-        private String userId;
-        private String userEmail;
-        private String createdAt;
-    }
-
 }
