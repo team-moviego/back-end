@@ -1,5 +1,7 @@
 package com.hwansol.moviego.member.service;
 
+import com.hwansol.moviego.mail.service.MailService;
+import com.hwansol.moviego.mail.service.MailType;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
 import com.hwansol.moviego.member.exception.MemberException;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
     private final MemberRepository memberRepository;
 
     /**
@@ -43,6 +46,20 @@ public class MemberService {
         if (!isDuplicated) {
             throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
         }
+    }
+
+    /**
+     * 아이디 찾기 서비스
+     *
+     * @param userEmail - 아이디 전송할 회원 이메일 주소
+     */
+    //todo: 카카오 회원인지 구분하는 로직 구현 필요
+    public void findId(String userEmail) {
+        Member member = memberRepository.findByUserEmail(userEmail)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        String userId = member.getUserId();
+        mailService.sendEmail(userEmail, userId, MailType.ID);
     }
 
     /**
