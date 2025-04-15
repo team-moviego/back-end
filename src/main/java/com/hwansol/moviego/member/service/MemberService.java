@@ -33,6 +33,19 @@ public class MemberService {
     }
 
     /**
+     * 이메일 중복 확인 서비스
+     *
+     * @param userEmail - 사용할 이메일
+     */
+    public void duplicatedEmail(String userEmail) {
+        boolean isDuplicated = memberRepository.existsByUserEmail(userEmail);
+
+        if (!isDuplicated) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
+        }
+    }
+
+    /**
      * 회원 조회 서비스
      *
      * @param userId 조회할 회원 아이디
