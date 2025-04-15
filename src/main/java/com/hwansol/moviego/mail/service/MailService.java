@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MailService {
-    
+
     private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.sender-email}")
@@ -26,7 +26,7 @@ public class MailService {
      * @param content   - 회원에게 알려줄 내용
      * @param mailType  - 어떤 형식의 메일인지 알려주는 enum
      */
-    public void sendIdEmail(String userEmail, String content, MailType mailType) {
+    public void sendEmail(String userEmail, String content, MailType mailType) {
         MimeMessage message = createMail(userEmail, content, mailType);
         javaMailSender.send(message);
     }
