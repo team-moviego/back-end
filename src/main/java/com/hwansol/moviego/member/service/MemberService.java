@@ -8,6 +8,7 @@ import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+//todo: 카카오 회원인지 구분하는 로직 구현 필요
 public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
@@ -53,13 +55,34 @@ public class MemberService {
      *
      * @param userEmail - 아이디 전송할 회원 이메일 주소
      */
-    //todo: 카카오 회원인지 구분하는 로직 구현 필요
     public void findId(String userEmail) {
         Member member = memberRepository.findByUserEmail(userEmail)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         String userId = member.getUserId();
         mailService.sendEmail(userEmail, userId, MailType.ID);
+    }
+
+    /**
+     * 비밀번호 찾기 서비스
+     *
+     * @param userId    - 비밀번호를 찾을 회원 아이디
+     * @param userEmail - 임시비밀번호를 발송할 회원 이메일
+     */
+    public void findPw(String userId, String userEmail) {
+        Member member = memberRepository.findByUserId(userId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        String temporaryPw = UUID.randomUUID().toString().substring(0, 7); // 8자리 임시 비밀번호
+        String newPw = passwordEncoder.encode(temporaryPw);
+
+        member = member.toBuilder()
+            .userPw(newPw)
+            .build();
+
+        memberRepository.save(member);
+
+        mailService.sendEmail(userEmail, temporaryPw, MailType.PW);
     }
 
     /**
