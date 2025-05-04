@@ -8,8 +8,11 @@ import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
+import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 //todo: 카카오 회원인지 구분하는 로직 구현 필요
 public class MemberService {
 
+    private static final String AUTH_NUM_KEY = "auth:";
+    private static final String IS_AUTH_KEY = "isAuth:";
+
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final RedisTemplate<String, String> redisTemplate;
     private final MemberRepository memberRepository;
 
     /**
@@ -97,6 +104,19 @@ public class MemberService {
     }
 
     /**
+     * 인증번호 이메일 발송 서비스
+     *
+     * @param userEmail - 인증번호 발송할 회원 이메일 주소
+     */
+    public void sendAuthNum(String userEmail) {
+        String authNum = createAuthNum();
+        redisTemplate.opsForValue().set(AUTH_NUM_KEY + userEmail, authNum, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(IS_AUTH_KEY + userEmail, "false", Duration.ofMinutes(5));
+
+        mailService.sendEmail(userEmail, authNum, MailType.AUTH);
+    }
+
+    /**
      * 회원가입 서비스
      *
      * @param request - MemberSignupDto.Request
@@ -114,5 +134,12 @@ public class MemberService {
             .build();
 
         return memberRepository.save(member);
+    }
+
+    private String createAuthNum() {
+        SecureRandom sr = new SecureRandom();
+        int random = sr.nextInt(1_000_000); // 1~999999 랜덤 수 생성
+
+        return String.format("%06d", random); // 앞자리 0을 포함한 6자리 문자열로 반환
     }
 }
