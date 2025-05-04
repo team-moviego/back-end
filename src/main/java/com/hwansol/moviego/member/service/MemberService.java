@@ -117,6 +117,24 @@ public class MemberService {
     }
 
     /**
+     * 인증번호 확인 서비스
+     *
+     * @param userEmail - 회원 이메일
+     * @param authNum   - 회원이 입력한 인증번호
+     */
+    public void checkAuthNum(String userEmail, String authNum) {
+        String originAuthNum = redisTemplate.opsForValue().get(AUTH_NUM_KEY + userEmail);
+
+        if (originAuthNum == null) {
+            throw new MemberException(MemberErrorCode.TIME_OVER_AUTH);
+        }
+
+        if (!originAuthNum.equals(authNum)) {
+            throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
+        }
+    }
+
+    /**
      * 회원가입 서비스
      *
      * @param request - MemberSignupDto.Request
