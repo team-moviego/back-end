@@ -29,11 +29,11 @@ public class MemberFindIdDto {
     @Builder
     public static class Response {
 
-        private String userId;
+        private String userEmail;
 
         public static MemberFindIdDto.Response from(Member member) {
             return Response.builder()
-                .userId(member.getUserId())
+                .userEmail(member.getUserEmail())
                 .build();
         }
     }
