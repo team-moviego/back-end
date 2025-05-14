@@ -3,6 +3,7 @@ package com.hwansol.moviego.member.service;
 import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.mail.service.MailType;
+import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
@@ -138,6 +139,8 @@ public class MemberService {
         if (!originAuthNum.equals(authNum)) {
             throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
         }
+
+        redisTemplate.opsForValue().set(IS_AUTH_KEY + userEmail, "true");
     }
 
     /**
@@ -147,6 +150,13 @@ public class MemberService {
      * @return 회원가입된 엔티티
      */
     public Member signup(MemberSignupDto.Request request) {
+
+        String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY + request.getUserEmail());
+        if (isAuth == null || !isAuth.equals("true")) {
+            throw new MemberException(MemberErrorCode.NOT_COMPLETED_AUTH);
+        }
+
+        redisTemplate.delete(IS_AUTH_KEY + request.getUserEmail());
 
         String encodedPw = passwordEncoder.encode(request.getUserPw());
 
@@ -192,10 +202,50 @@ public class MemberService {
         tokenProvider.logout(request, response);
     }
 
+    /**
+     * 회원 이메일 변경 서비스
+     *
+     * @param request MemberModifyEmailDto.Request
+     * @return 이메일 변경 후 저장된 회원 엔티티
+     */
+    public Member modifyEmail(MemberModifyEmailDto.Request request) {
+        Member member = validatedInModifyEmail(request);
+
+        member = member.toBuilder()
+            .userEmail(request.getNewEmail())
+            .build();
+
+        return memberRepository.save(member);
+    }
+
+    // 인증번호 생성 메소드
     private String createAuthNum() {
         SecureRandom sr = new SecureRandom();
         int random = sr.nextInt(1_000_000); // 1~999999 랜덤 수 생성
 
         return String.format("%06d", random); // 앞자리 0을 포함한 6자리 문자열로 반환
+    }
+
+    // 회원 이메일 변경 시 validate를 위한 메소드
+    private Member validatedInModifyEmail(MemberModifyEmailDto.Request request) {
+        Member member = memberRepository.findByUserEmail(request.getOriginEmail())
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        if (member.getUserEmail().equals(request.getNewEmail())) {
+            throw new MemberException(MemberErrorCode.ORIGIN_EQUALS_NEW_OF_EMAIL);
+        }
+
+        if (memberRepository.existsByUserEmail(request.getNewEmail())) {
+            throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
+        }
+
+        String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY + request.getNewEmail());
+        if (isAuth == null || !isAuth.equals("true")) {
+            throw new MemberException(MemberErrorCode.NOT_COMPLETED_AUTH);
+        }
+
+        redisTemplate.delete(IS_AUTH_KEY + request.getNewEmail());
+
+        return member;
     }
 }
