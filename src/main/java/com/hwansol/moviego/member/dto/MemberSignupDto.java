@@ -27,6 +27,9 @@ public class MemberSignupDto {
         @Size(min = 8, max = 20, message = "비밀번호는 8~20자 사이로 작성하여야합니다.")
         private String userPw;
 
+        @NotBlank(message = "비밀번호 확인란을 입력해주세요.")
+        private String confirmPw;
+
         @NotBlank(message = "이메일을 입력해주세요.")
         @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.")
         private String userEmail;
