@@ -10,6 +10,7 @@ import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -179,6 +180,16 @@ public class MemberService {
 
         return tokenProvider.generateAccessToken(member.getUserId(),
             List.of(member.getRole().getName()));
+    }
+
+    /**
+     * 회원 로그아웃 서비스
+     *
+     * @param request  ServletRequest
+     * @param response ServletResponse
+     */
+    public void signOut(HttpServletRequest request, HttpServletResponse response) {
+        tokenProvider.logout(request, response);
     }
 
     private String createAuthNum() {
