@@ -34,5 +34,6 @@ public class MemberSignInDto {
     public static class Response {
 
         private String userId;
+        private String accessToken; // 토큰
     }
 }
