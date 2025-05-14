@@ -4,6 +4,7 @@ import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -51,15 +53,30 @@ public class MemberController {
      * 아이디 찾기 컨트롤러
      *
      * @param request MemberFindDto.Request
-     * @return MemberFindDto.Response
+     * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
      */
     @GetMapping("/member/id")
     public ResponseEntity<MemberFindIdDto.Response> findIdController(
-        @RequestBody MemberFindIdDto.Request request) {
+        @Valid @RequestBody MemberFindIdDto.Request request) {
         Member member = memberService.findId(request);
 
         Response response = Response.from(member);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 비밀번호 찾기 컨트롤러
+     *
+     * @param userId    회원 아이디
+     * @param userEmail 회원 이메일
+     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러 코드와 에러 메시지
+     */
+    @GetMapping("/member")
+    public ResponseEntity<String> findPwController(@RequestParam String userId,
+        @RequestParam String userEmail) {
+        memberService.findPw(userId, userEmail);
+
+        return ResponseEntity.ok("이메일로 임시 비밀번호를 발급하였습니다. 로그인 이후 비밀번호 변경 바랍니다.");
     }
 }
