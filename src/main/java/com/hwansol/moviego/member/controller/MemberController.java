@@ -1,11 +1,15 @@
 package com.hwansol.moviego.member.controller;
 
+import com.hwansol.moviego.member.dto.MemberFindIdDto;
+import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
+import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,5 +45,21 @@ public class MemberController {
         memberService.duplicatedEmail(userEmail);
 
         return ResponseEntity.ok("사용가능한 이메일입니다.");
+    }
+
+    /**
+     * 아이디 찾기 컨트롤러
+     *
+     * @param request MemberFindDto.Request
+     * @return MemberFindDto.Response
+     */
+    @GetMapping("/member/id")
+    public ResponseEntity<MemberFindIdDto.Response> findIdController(
+        @RequestBody MemberFindIdDto.Request request) {
+        Member member = memberService.findId(request);
+
+        Response response = Response.from(member);
+
+        return ResponseEntity.ok(response);
     }
 }
