@@ -2,11 +2,14 @@ package com.hwansol.moviego.member.controller;
 
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
+import com.hwansol.moviego.member.dto.MemberGetDto;
 import com.hwansol.moviego.member.model.Member;
+import com.hwansol.moviego.member.model.MemberDetails;
 import com.hwansol.moviego.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,5 +81,22 @@ public class MemberController {
         memberService.findPw(userId, userEmail);
 
         return ResponseEntity.ok("이메일로 임시 비밀번호를 발급하였습니다. 로그인 이후 비밀번호 변경 바랍니다.");
+    }
+
+    /**
+     * 회원 조회 컨트롤러
+     *
+     * @param memberDetails UserDetails
+     * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
+     */
+    @GetMapping("/member")
+    public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal
+    MemberDetails memberDetails) {
+        String userId = memberDetails.getUsername();
+
+        Member member = memberService.getMember(userId);
+        MemberGetDto.Response response = MemberGetDto.Response.from(member);
+
+        return ResponseEntity.ok(response);
     }
 }
