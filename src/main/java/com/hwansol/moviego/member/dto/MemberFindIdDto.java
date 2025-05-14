@@ -1,5 +1,6 @@
 package com.hwansol.moviego.member.dto;
 
+import com.hwansol.moviego.member.model.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
@@ -25,8 +26,15 @@ public class MemberFindIdDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Builder
     public static class Response {
 
         private String userId;
+
+        public static MemberFindIdDto.Response from(Member member) {
+            return Response.builder()
+                .userId(member.getUserId())
+                .build();
+        }
     }
 }
