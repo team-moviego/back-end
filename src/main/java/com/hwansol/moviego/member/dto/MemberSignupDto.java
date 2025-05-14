@@ -32,4 +32,12 @@ public class MemberSignupDto {
         private String userEmail;
     }
 
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class Response {
+
+        private String userId;
+    }
+
 }
