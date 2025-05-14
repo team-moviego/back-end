@@ -29,3 +29,17 @@ public class MemberController {
 
         return ResponseEntity.ok("사용가능한 아이디입니다.");
     }
+
+    /**
+     * 이메일 중복 확인 컨트롤러
+     *
+     * @param userEmail 회원 이메일
+     * @return 성공 시 200 상태코드와 성공 메시지, 실패 시 에러코드와 에러 메시지
+     */
+    @GetMapping("/member/{userEmail}")
+    public ResponseEntity<String> isDuplicatedEmail(@PathVariable String userEmail) {
+        memberService.duplicatedEmail(userEmail);
+
+        return ResponseEntity.ok("사용가능한 이메일입니다.");
+    }
+}
