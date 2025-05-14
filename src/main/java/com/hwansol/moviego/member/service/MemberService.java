@@ -4,6 +4,7 @@ import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.mail.service.MailType;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
+import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
@@ -150,13 +151,7 @@ public class MemberService {
      * @return 회원가입된 엔티티
      */
     public Member signup(MemberSignupDto.Request request) {
-
-        String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY + request.getUserEmail());
-        if (isAuth == null || !isAuth.equals("true")) {
-            throw new MemberException(MemberErrorCode.NOT_COMPLETED_AUTH);
-        }
-
-        redisTemplate.delete(IS_AUTH_KEY + request.getUserEmail());
+        validatedInSignUp(request);
 
         String encodedPw = passwordEncoder.encode(request.getUserPw());
 
@@ -218,12 +213,45 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    /**
+     * 회원 비밀번호 변경 서비스
+     *
+     * @param userId  회원 아이디
+     * @param request MemberModifyPwDto.Request
+     * @return 비밀번호가 변경된 회원 엔티티
+     */
+    public Member modifyPw(String userId, MemberModifyPwDto.Request request) {
+        Member member = validatedInModifyPw(userId, request);
+
+        String encodedPw = passwordEncoder.encode(request.getNewPw());
+
+        member = member.toBuilder()
+            .userPw(encodedPw)
+            .build();
+
+        return memberRepository.save(member);
+    }
+
     // 인증번호 생성 메소드
     private String createAuthNum() {
         SecureRandom sr = new SecureRandom();
         int random = sr.nextInt(1_000_000); // 1~999999 랜덤 수 생성
 
         return String.format("%06d", random); // 앞자리 0을 포함한 6자리 문자열로 반환
+    }
+
+    // 회원가입 시 validate를 위한 메소드
+    private void validatedInSignUp(MemberSignupDto.Request request) {
+        String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY + request.getUserEmail());
+        if (isAuth == null || !isAuth.equals("true")) {
+            throw new MemberException(MemberErrorCode.NOT_COMPLETED_AUTH);
+        }
+
+        if (!request.getUserPw().equals(request.getConfirmPw())) {
+            throw new MemberException(MemberErrorCode.DIFF_PW_AND_CONFIRM);
+        }
+
+        redisTemplate.delete(IS_AUTH_KEY + request.getUserEmail());
     }
 
     // 회원 이메일 변경 시 validate를 위한 메소드
@@ -245,6 +273,22 @@ public class MemberService {
         }
 
         redisTemplate.delete(IS_AUTH_KEY + request.getNewEmail());
+
+        return member;
+    }
+
+    // 회원 비밀번호 변경 시 validate를 위한 메소드
+    private Member validatedInModifyPw(String userId, MemberModifyPwDto.Request request) {
+        Member member = memberRepository.findByUserId(userId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        if (!passwordEncoder.matches(request.getOriginPw(), member.getUserPw())) {
+            throw new MemberException(MemberErrorCode.WRONG_ORIGIN_PW);
+        }
+
+        if (!request.getNewPw().equals(request.getConfirmPw())) {
+            throw new MemberException(MemberErrorCode.DIFF_PW_AND_CONFIRM);
+        }
 
         return member;
     }
