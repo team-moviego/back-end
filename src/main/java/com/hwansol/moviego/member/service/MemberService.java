@@ -1,15 +1,19 @@
 package com.hwansol.moviego.member.service;
 
+import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.mail.service.MailType;
+import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
 import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -30,6 +34,7 @@ public class MemberService {
     private final MailService mailService;
     private final RedisTemplate<String, String> redisTemplate;
     private final MemberRepository memberRepository;
+    private final TokenProvider tokenProvider;
 
     /**
      * 아이디 중복 확인 서비스
@@ -152,6 +157,28 @@ public class MemberService {
             .build();
 
         return memberRepository.save(member);
+    }
+
+    /**
+     * 일반 로그인 서비스
+     *
+     * @param request  MemberSignUpDto.Request
+     * @param response ServletResponse
+     * @return 생성된 accessToken
+     */
+    public String signIn(MemberSignInDto.Request request, HttpServletResponse response) {
+        Member member = memberRepository.findByUserId(request.getUserId())
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        if (!passwordEncoder.matches(request.getUserPw(), member.getUserPw())) {
+            throw new MemberException(MemberErrorCode.WRONG_PASSWORD);
+        }
+
+        tokenProvider.generateRefreshToken(member.getUserId(), List.of(member.getRole().getName()),
+            response);
+
+        return tokenProvider.generateAccessToken(member.getUserId(),
+            List.of(member.getRole().getName()));
     }
 
     private String createAuthNum() {
