@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -230,6 +231,29 @@ public class MemberService {
             .build();
 
         return memberRepository.save(member);
+    }
+
+    /**
+     * 회원탈퇴 서비스
+     *
+     * @param userId   회원 아이디
+     * @param request  ServletRequest
+     * @param response ServletResponse
+     * @return 탈퇴 처리된 회원 엔티티
+     */
+    public Member deleteMember(String userId, HttpServletRequest request,
+        HttpServletResponse response) {
+        Member member = memberRepository.findByUserId(userId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        member = member.toBuilder()
+            .delDate(LocalDateTime.now())
+            .build();
+        Member result = memberRepository.save(member);
+
+        tokenProvider.logout(request, response);
+
+        return result;
     }
 
     // 인증번호 생성 메소드
