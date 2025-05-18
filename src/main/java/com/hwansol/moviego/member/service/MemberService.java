@@ -63,7 +63,7 @@ public class MemberService {
     public void duplicatedEmail(String userEmail) {
         boolean isDuplicated = memberRepository.existsByUserEmail(userEmail);
 
-        if (!isDuplicated) {
+        if (isDuplicated) {
             throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
         }
     }
