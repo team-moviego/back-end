@@ -3,6 +3,7 @@ package com.hwansol.moviego.member.service;
 import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.mail.service.MailType;
+import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberModifyPwDto;
@@ -132,21 +133,21 @@ public class MemberService {
     /**
      * 인증번호 확인 서비스
      *
-     * @param userEmail - 회원 이메일
-     * @param authNum   - 회원이 입력한 인증번호
+     * @param request MemberAuthDto.Request
      */
-    public void checkAuthNum(String userEmail, String authNum) {
-        String originAuthNum = redisTemplate.opsForValue().get(AUTH_NUM_KEY + userEmail);
+    public void checkAuthNum(MemberAuthDto.Request request) {
+        String originAuthNum = redisTemplate.opsForValue()
+            .get(AUTH_NUM_KEY + request.getUserEmail());
 
         if (originAuthNum == null) {
             throw new MemberException(MemberErrorCode.TIME_OVER_AUTH);
         }
 
-        if (!originAuthNum.equals(authNum)) {
+        if (!originAuthNum.equals(request.getAuthNum())) {
             throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
         }
 
-        redisTemplate.opsForValue().set(IS_AUTH_KEY + userEmail, "true");
+        redisTemplate.opsForValue().set(IS_AUTH_KEY + request.getUserEmail(), "true");
     }
 
     /**
