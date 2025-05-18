@@ -1,5 +1,6 @@
 package com.hwansol.moviego.member.controller;
 
+import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.dto.MemberGetDto;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -95,6 +97,7 @@ public class MemberController {
      * @param memberDetails UserDetails
      * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
      */
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/member")
     public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal
     MemberDetails memberDetails) {
@@ -118,5 +121,18 @@ public class MemberController {
         memberService.sendAuthNum(userEmail);
 
         return ResponseEntity.ok("인증번호가 전송되었습니다.");
+    }
+
+    /**
+     * 인증번호 확인 컨트롤러
+     *
+     * @param request MemberAuthDto.Request
+     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/member/auth-check")
+    public ResponseEntity<String> checkAuthNum(@Valid @RequestBody MemberAuthDto.Request request) {
+        memberService.checkAuthNum(request);
+
+        return ResponseEntity.ok("이메일 인증에 성공하셨습니다.");
     }
 }
