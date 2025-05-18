@@ -5,6 +5,7 @@ import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.dto.MemberGetDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
+import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
@@ -204,6 +205,25 @@ public class MemberController {
         @Valid @RequestBody MemberModifyEmailDto.Request request) {
         Member member = memberService.modifyEmail(request);
         MemberModifyEmailDto.Response response = MemberModifyEmailDto.Response.from(member);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 회원 비밀번호 변경 컨트롤러
+     *
+     * @param request       MemberModifyPwDto.Request
+     * @param memberDetails MemberDetails
+     * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
+     */
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("/member/pw")
+    public ResponseEntity<MemberModifyPwDto.Response> modifyPwController(
+        @Valid @RequestBody MemberModifyPwDto.Request request,
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        String userId = memberDetails.getUsername();
+        Member member = memberService.modifyPw(userId, request);
+        MemberModifyPwDto.Response response = MemberModifyPwDto.Response.from(member);
 
         return ResponseEntity.ok(response);
     }
