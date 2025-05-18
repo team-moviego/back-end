@@ -4,6 +4,7 @@ import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.dto.MemberGetDto;
+import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
@@ -21,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -188,5 +190,21 @@ public class MemberController {
         memberService.signOut(request, response);
 
         return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
+
+    /**
+     * 회원 이메일 변경 컨트롤러
+     *
+     * @param request MemberModifyEmailDto.Request
+     * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
+     */
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("/member/email")
+    public ResponseEntity<MemberModifyEmailDto.Response> modifyEmailController(
+        @Valid @RequestBody MemberModifyEmailDto.Request request) {
+        Member member = memberService.modifyEmail(request);
+        MemberModifyEmailDto.Response response = MemberModifyEmailDto.Response.from(member);
+
+        return ResponseEntity.ok(response);
     }
 }
