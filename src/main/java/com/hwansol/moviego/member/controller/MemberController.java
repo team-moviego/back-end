@@ -4,6 +4,7 @@ import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.dto.MemberGetDto;
+import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.MemberDetails;
 import com.hwansol.moviego.member.service.MemberService;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -134,5 +136,20 @@ public class MemberController {
         memberService.checkAuthNum(request);
 
         return ResponseEntity.ok("이메일 인증에 성공하셨습니다.");
+    }
+
+    /**
+     * 회원가입 컨트롤러
+     *
+     * @param request MemberSignupDto.Request
+     * @return 성공 시 201 코드와 회원가입한 아이디, 실패 시 에러코드와 에러메시지
+     */
+    public ResponseEntity<MemberSignupDto.Response> signupController(
+        @Valid @RequestBody MemberSignupDto.Request request) {
+        Member member = memberService.signup(request);
+        MemberSignupDto.Response response = MemberSignupDto.Response.from(member);
+
+        return ResponseEntity.status(HttpStatus.CREATED.value())
+            .body(response);
     }
 }
