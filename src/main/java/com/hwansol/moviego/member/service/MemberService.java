@@ -50,7 +50,7 @@ public class MemberService {
     public void duplicatedId(String userId) {
         boolean isDuplicated = memberRepository.existsByUserId(userId);
 
-        if (!isDuplicated) {
+        if (isDuplicated) {
             throw new MemberException(MemberErrorCode.DUPLICATED_ID);
         }
     }
