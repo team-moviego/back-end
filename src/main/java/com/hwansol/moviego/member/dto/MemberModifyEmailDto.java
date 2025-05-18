@@ -1,9 +1,11 @@
 package com.hwansol.moviego.member.dto;
 
+import com.hwansol.moviego.member.model.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,9 +30,16 @@ public class MemberModifyEmailDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Builder
     public static class Response {
 
         private String userEmail;
+
+        public static MemberModifyEmailDto.Response from(Member member) {
+            return Response.builder()
+                .userEmail(member.getUserEmail())
+                .build();
+        }
     }
 
 }
