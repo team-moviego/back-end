@@ -1,6 +1,5 @@
 package com.hwansol.moviego.member.dto;
 
-import com.hwansol.moviego.member.model.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -38,9 +37,9 @@ public class MemberSignInDto {
         private String userId;
         private String accessToken; // 토큰
 
-        public static MemberSignInDto.Response from(Member member, String accessToken) {
+        public static MemberSignInDto.Response from(String userId, String accessToken) {
             return Response.builder()
-                .userId(member.getUserId())
+                .userId(userId)
                 .accessToken(accessToken)
                 .build();
         }
