@@ -1,6 +1,7 @@
 package com.hwansol.moviego.member.controller;
 
 import com.hwansol.moviego.member.dto.MemberAuthDto;
+import com.hwansol.moviego.member.dto.MemberDeleteDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.dto.MemberGetDto;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -224,6 +226,26 @@ public class MemberController {
         String userId = memberDetails.getUsername();
         Member member = memberService.modifyPw(userId, request);
         MemberModifyPwDto.Response response = MemberModifyPwDto.Response.from(member);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 회원 탈퇴 컨트롤러
+     *
+     * @param memberDetails   MemberDetails
+     * @param servletRequest  HttpServletRequest
+     * @param servletResponse HttpServletResponse
+     * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러케시지
+     */
+    @PreAuthorize("hasRole('USER')")
+    @DeleteMapping("/member")
+    public ResponseEntity<MemberDeleteDto.Response> deleteMemberController(
+        @AuthenticationPrincipal MemberDetails memberDetails, HttpServletRequest servletRequest,
+        HttpServletResponse servletResponse) {
+        String userId = memberDetails.getUsername();
+        Member member = memberService.deleteMember(userId, servletRequest, servletResponse);
+        MemberDeleteDto.Response response = MemberDeleteDto.Response.from(member);
 
         return ResponseEntity.ok(response);
     }
