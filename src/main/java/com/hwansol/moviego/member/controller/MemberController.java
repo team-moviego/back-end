@@ -4,10 +4,12 @@ import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
 import com.hwansol.moviego.member.dto.MemberGetDto;
+import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.MemberDetails;
 import com.hwansol.moviego.member.service.MemberService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -144,6 +146,7 @@ public class MemberController {
      * @param request MemberSignupDto.Request
      * @return 성공 시 201 코드와 회원가입한 아이디, 실패 시 에러코드와 에러메시지
      */
+    @PostMapping("/member/signup")
     public ResponseEntity<MemberSignupDto.Response> signupController(
         @Valid @RequestBody MemberSignupDto.Request request) {
         Member member = memberService.signup(request);
@@ -151,5 +154,22 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.CREATED.value())
             .body(response);
+    }
+
+    /**
+     * 로그인 컨트롤러
+     *
+     * @param request         MemberSignInDto.Request
+     * @param servletResponse HttpServletResponse
+     * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/member/signin")
+    public ResponseEntity<MemberSignInDto.Response> signInController(
+        @Valid @RequestBody MemberSignInDto.Request request, HttpServletResponse servletResponse) {
+        String accessToken = memberService.signIn(request, servletResponse);
+        MemberSignInDto.Response response = MemberSignInDto.Response.from(request.getUserId(),
+            accessToken);
+
+        return ResponseEntity.ok(response);
     }
 }
