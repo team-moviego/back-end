@@ -9,6 +9,7 @@ import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.MemberDetails;
 import com.hwansol.moviego.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -171,5 +172,21 @@ public class MemberController {
             accessToken);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 로그아웃 컨트롤러
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     * @return 성공 시 200 코드와 성공메시지, 실패 시 에러코드와 에러메시지
+     */
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/member/signout")
+    public ResponseEntity<String> signOutController(HttpServletRequest request,
+        HttpServletResponse response) {
+        memberService.signOut(request, response);
+
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 }
