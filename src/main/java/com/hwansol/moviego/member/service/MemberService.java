@@ -94,7 +94,7 @@ public class MemberService {
         Member member = memberRepository.findByUserId(userId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        String temporaryPw = UUID.randomUUID().toString().substring(0, 7); // 8자리 임시 비밀번호
+        String temporaryPw = UUID.randomUUID().toString().substring(0, 8); // 8자리 임시 비밀번호
         String newPw = passwordEncoder.encode(temporaryPw);
 
         member = member.toBuilder()
