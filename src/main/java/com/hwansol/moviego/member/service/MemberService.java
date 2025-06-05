@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 //todo: 카카오 회원인지 구분하는 로직 구현 필요
 public class MemberService {
 
@@ -47,6 +46,7 @@ public class MemberService {
      *
      * @param userId - 사용할 아이디
      */
+    @Transactional(readOnly = true)
     public void duplicatedId(String userId) {
         boolean isDuplicated = memberRepository.existsByUserId(userId);
 
@@ -60,6 +60,7 @@ public class MemberService {
      *
      * @param userEmail - 사용할 이메일
      */
+    @Transactional(readOnly = true)
     public void duplicatedEmail(String userEmail) {
         boolean isDuplicated = memberRepository.existsByUserEmail(userEmail);
 
@@ -74,6 +75,7 @@ public class MemberService {
      * @param request MemberFindIdDto.Request
      * @return 회원 엔티티
      */
+    @Transactional(readOnly = true)
     public Member findId(MemberFindIdDto.Request request) {
         Member member = memberRepository.findByUserEmail(request.getUserEmail())
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
@@ -90,6 +92,7 @@ public class MemberService {
      * @param userId    - 비밀번호를 찾을 회원 아이디
      * @param userEmail - 임시비밀번호를 발송할 회원 이메일
      */
+    @Transactional
     public void findPw(String userId, String userEmail) {
         Member member = memberRepository.findByUserId(userId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
@@ -112,6 +115,7 @@ public class MemberService {
      * @param userId 조회할 회원 아이디
      * @return 조회된 회원 엔티티
      */
+    @Transactional(readOnly = true)
     public Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
