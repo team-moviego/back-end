@@ -15,6 +15,7 @@ public class MemberModifyEmailDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Builder(toBuilder = true)
     public static class Request {
 
         @NotBlank(message = "기존 이메일을 입력해주세요.")
