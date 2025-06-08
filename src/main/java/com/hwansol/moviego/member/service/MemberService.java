@@ -4,7 +4,6 @@ import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.mail.service.MailType;
 import com.hwansol.moviego.member.dto.MemberAuthDto;
-import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
@@ -72,16 +71,16 @@ public class MemberService {
     /**
      * 아이디 찾기 서비스
      *
-     * @param request MemberFindIdDto.Request
+     * @param userEmail 회원이메일
      * @return 회원 엔티티
      */
     @Transactional(readOnly = true)
-    public Member findId(MemberFindIdDto.Request request) {
-        Member member = memberRepository.findByUserEmail(request.getUserEmail())
+    public Member findId(String userEmail) {
+        Member member = memberRepository.findByUserEmail(userEmail)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         String userId = member.getUserId();
-        mailService.sendEmail(request.getUserEmail(), userId, MailType.ID);
+        mailService.sendEmail(userEmail, userId, MailType.ID);
 
         return member;
     }
