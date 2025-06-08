@@ -23,8 +23,8 @@ public class MemberAuthDto {
         private String userEmail;
 
         @NotBlank(message = "인증번호를 입력해주세요.")
-        @Pattern(regexp = "^\\d{6}$", message = "인증번호는 6자리 숫자입니다.")
-        @Size(min = 6, message = "인증번호는 6자리 숫자입니다.")
+        @Pattern(regexp = "^\\d{6}$", message = "인증번호는 숫자입니다.")
+        @Size(min = 6, message = "인증번호는 6자리입니다.")
         private String authNum;
     }
 }
