@@ -47,9 +47,9 @@ public class MemberController {
      * @param userId 회원 아이디
      * @return 성공 시 200 상태코드와 성공 메시지, 실패 시 에러코드와 에러 메시지
      */
-    @GetMapping("/member/{userId}")
+    @GetMapping("/member/id/{userId}")
     public ResponseEntity<String> isDuplicatedId(
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 + 숫자 조합으로 작성해야 합니다.") @PathVariable String userId) {
+        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 또는 영문 + 숫자 조합으로 작성해야 합니다.") @PathVariable String userId) {
         memberService.duplicatedId(userId);
 
         return ResponseEntity.ok("사용가능한 아이디입니다.");
@@ -61,9 +61,9 @@ public class MemberController {
      * @param userEmail 회원 이메일
      * @return 성공 시 200 상태코드와 성공 메시지, 실패 시 에러코드와 에러 메시지
      */
-    @GetMapping("/member/{userEmail}")
+    @GetMapping("/member/email/{userEmail}")
     public ResponseEntity<String> isDuplicatedEmail(
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @PathVariable String userEmail) {
+        @NotBlank(message = "이메일을 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @PathVariable String userEmail) {
         memberService.duplicatedEmail(userEmail);
 
         return ResponseEntity.ok("사용가능한 이메일입니다.");
@@ -72,13 +72,14 @@ public class MemberController {
     /**
      * 아이디 찾기 컨트롤러
      *
-     * @param request MemberFindDto.Request
+     * @param userEmail 회원이메일
      * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
      */
     @GetMapping("/member/id")
     public ResponseEntity<MemberFindIdDto.Response> findIdController(
-        @Valid @RequestBody MemberFindIdDto.Request request) {
-        Member member = memberService.findId(request);
+        @NotBlank(message = "이메일을 입력해주세요.")
+        @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
+        Member member = memberService.findId(userEmail);
 
         Response response = Response.from(member);
 
@@ -92,9 +93,9 @@ public class MemberController {
      * @param userEmail 회원 이메일
      * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러 코드와 에러 메시지
      */
-    @GetMapping("/member")
+    @GetMapping("/member/pw")
     public ResponseEntity<String> findPwController(
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 + 숫자 조합으로 작성해야 합니다.") @RequestParam String userId,
+        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 또는 영문 + 숫자 조합으로 작성해야 합니다.") @RequestParam String userId,
         @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
         memberService.findPw(userId, userEmail);
 
