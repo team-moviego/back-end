@@ -14,7 +14,6 @@ import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.mail.service.MailType;
 import com.hwansol.moviego.member.dto.MemberAuthDto;
-import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
@@ -116,19 +115,15 @@ class MemberServiceTest {
     @Test
     @DisplayName("아이디 찾기")
     void findId() {
-        MemberFindIdDto.Request request = MemberFindIdDto.Request.builder()
-            .userEmail("test@naver.com")
-            .build();
-
         Member member = Member.builder()
             .userEmail("test@naver.com")
             .userId("test")
             .build();
 
-        when(memberRepository.findByUserEmail(request.getUserEmail())).thenReturn(
+        when(memberRepository.findByUserEmail("test@naver.com")).thenReturn(
             Optional.of(member));
 
-        Member result = memberService.findId(request);
+        Member result = memberService.findId("test@naver.com");
 
         assertThat(result.getUserId()).isEqualTo("test");
     }
@@ -136,13 +131,9 @@ class MemberServiceTest {
     @Test
     @DisplayName("아이디 찾기 실패 - 없는 회원")
     void findIdFail1() {
-        MemberFindIdDto.Request request = MemberFindIdDto.Request.builder()
-            .userEmail("test@naver.com")
-            .build();
+        when(memberRepository.findByUserEmail("test@naver.com")).thenReturn(Optional.empty());
 
-        when(memberRepository.findByUserEmail(request.getUserEmail())).thenReturn(Optional.empty());
-
-        assertThrows(MemberException.class, () -> memberService.findId(request),
+        assertThrows(MemberException.class, () -> memberService.findId("test@naver.com"),
             MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
