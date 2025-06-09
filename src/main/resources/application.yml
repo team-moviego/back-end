@@ -1,6 +1,15 @@
+server:
+  error:
+    whitelabel:
+      enabled: false
+
 spring:
   application:
     name: moviego
+
+  web:
+    resources:
+      add-mappings: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
