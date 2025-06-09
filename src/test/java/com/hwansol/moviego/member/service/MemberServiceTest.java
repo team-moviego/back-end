@@ -406,7 +406,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원 이메일 변경 서비스 실패 - 존재하지 않는 회워")
+    @DisplayName("회원 이메일 변경 서비스 실패 - 존재하지 않는 회원")
     void modifyEmailFail1() {
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
             .originEmail("test@naver.com")

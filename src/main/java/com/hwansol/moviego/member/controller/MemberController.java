@@ -128,7 +128,7 @@ public class MemberController {
      */
     @PostMapping("/auth")
     public ResponseEntity<String> sendAuthNumController(
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
+        @NotBlank(message = "이메일을 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
         memberService.sendAuthNum(userEmail);
 
         return ResponseEntity.ok("인증번호가 전송되었습니다.");
