@@ -1,5 +1,8 @@
 package com.hwansol.moviego.config;
 
+import com.hwansol.moviego.auth.TokenException;
+import com.hwansol.moviego.mail.exception.MailException;
+import com.hwansol.moviego.member.exception.MemberException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
@@ -131,5 +134,42 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest()
             .body("올바른 parameter 값이 아닙니다.");
+    }
+
+    @ExceptionHandler(MemberException.class)
+    private ResponseEntity<String> handleMemberException(MemberException e) {
+        log.error("회원 관련 에러 발생", e);
+
+        return ResponseEntity.badRequest()
+            .body(e.getMessage());
+    }
+
+    @ExceptionHandler(MailException.class)
+    private ResponseEntity<String> handleMailException(MailException e) {
+        log.error("메일 관련 에러 발생", e);
+
+        return ResponseEntity.internalServerError()
+            .body(e.getMessage());
+    }
+
+    @ExceptionHandler(TokenException.class)
+    private ResponseEntity<String> handleTokenException(TokenException e) {
+        log.error("토큰 관련 에러 발생", e);
+
+        if (e.getTokenErrorCode().getStatus() == 401) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(e.getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(e.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    private ResponseEntity<String> handleException(Exception e) {
+        log.error("예상하지 못한 에러 발생", e);
+
+        return ResponseEntity.internalServerError()
+            .body("예상치 못한 에러가 발생했습니다. 서버에 문의해주세요.");
     }
 }
