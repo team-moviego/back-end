@@ -6,9 +6,12 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +37,6 @@ public class TokenProvider {
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String COOKIE_NAME = "refreshToken";
-
     private final MemberDetailsService memberDetailsService;
 
     @Value("${spring.jwt.secret}")
@@ -162,10 +164,20 @@ public class TokenProvider {
         return !claims.getExpiration().before(new Date());
     }
 
+    // 서명할 시크릿 키
+    private Key getSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
     // 토큰 정보 가져오는 메소드
     private Claims parseClaims(String token) {
         try {
-            return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
         } catch (ExpiredJwtException e) {
             log.error("토큰 정보 에러 = {}", e.getMessage());
             throw new TokenException(TokenErrorCode.EXPIRED_ACCESS_TOKEN);
@@ -180,12 +192,14 @@ public class TokenProvider {
         Date now = new Date(); // 현재 날짜
         Date expiredDate = new Date(now.getTime() + tokenExpiredTime); // 만료 날짜
 
+        Key KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+
         return Jwts.builder()
             .setClaims(claims)
             .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
             .setIssuedAt(now) // 생성 날짜
             .setExpiration(expiredDate) // 만료 날짜
-            .signWith(SignatureAlgorithm.HS512, secret)
+            .signWith(getSecretKey())
             .compact();
     }
 
