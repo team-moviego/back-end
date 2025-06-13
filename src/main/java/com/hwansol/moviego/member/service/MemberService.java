@@ -11,6 +11,7 @@ import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
 import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
+import com.hwansol.moviego.member.model.OAuthProvider;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,6 +65,11 @@ public class MemberService {
         boolean isDuplicated = memberRepository.existsByUserEmail(userEmail);
 
         if (isDuplicated) {
+            Member member = memberRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+            isKakaoUser(member);
+
             throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
         }
     }
@@ -78,6 +84,8 @@ public class MemberService {
     public Member findId(String userEmail) {
         Member member = memberRepository.findByUserEmail(userEmail)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        isKakaoUser(member);
 
         String userId = member.getUserId();
         mailService.sendEmail(userEmail, userId, MailType.ID);
@@ -95,6 +103,8 @@ public class MemberService {
     public void findPw(String userId, String userEmail) {
         Member member = memberRepository.findByUserId(userId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        isKakaoUser(member);
 
         String temporaryPw = UUID.randomUUID().toString().substring(0, 8); // 8자리 임시 비밀번호
         String newPw = passwordEncoder.encode(temporaryPw);
@@ -264,6 +274,14 @@ public class MemberService {
         return result;
     }
 
+    // 카카오 회원 판별 메소드
+    private void isKakaoUser(Member member) {
+        if (member.getOAuthProvider() != null && member.getOAuthProvider()
+            .equals(OAuthProvider.KAKAO)) {
+            throw new MemberException(MemberErrorCode.SOCIAL_USER);
+        }
+    }
+
     // 인증번호 생성 메소드
     private String createAuthNum() {
         SecureRandom sr = new SecureRandom();
@@ -291,6 +309,8 @@ public class MemberService {
         Member member = memberRepository.findByUserEmail(request.getOriginEmail())
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
+        isKakaoUser(member);
+
         if (member.getUserEmail().equals(request.getNewEmail())) {
             throw new MemberException(MemberErrorCode.ORIGIN_EQUALS_NEW_OF_EMAIL);
         }
@@ -313,6 +333,8 @@ public class MemberService {
     private Member validatedInModifyPw(String userId, MemberModifyPwDto.Request request) {
         Member member = memberRepository.findByUserId(userId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        isKakaoUser(member);
 
         if (!passwordEncoder.matches(request.getOriginPw(), member.getUserPw())) {
             throw new MemberException(MemberErrorCode.WRONG_ORIGIN_PW);
