@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -21,6 +22,7 @@ import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
+import com.hwansol.moviego.member.model.PrincipalDetails;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -211,12 +213,12 @@ class MemberControllerTest {
             .userPw("pw")
             .userId("test")
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         when(memberService.getMember("test")).thenReturn(member);
 
         mockMvc.perform(get("/api/members/member")
-                .with(user(memberDetails)))
+                .with(user(principalDetails)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.userId").value("test"))
@@ -580,10 +582,10 @@ class MemberControllerTest {
             .userEmail("test@naver.com")
             .role(Role.ROLE_USER)
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         mockMvc.perform(post("/api/members/member/signout")
-                .with(user(memberDetails)))
+                .with(user(principalDetails)))
             .andDo(print())
             .andExpect(status().isOk());
     }
@@ -617,13 +619,13 @@ class MemberControllerTest {
             .userId("test")
             .userPw("qwe12345")
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         when(memberService.modifyEmail(
             argThat(r -> r.getNewEmail().equals("test@gmail.com")))).thenReturn(member);
 
         mockMvc.perform(patch("/api/members/member/email")
-                .with(user(memberDetails))
+                .with(user(principalDetails))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
@@ -666,10 +668,10 @@ class MemberControllerTest {
             .userEmail("test@gmail.com")
             .role(Role.ROLE_USER)
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         mockMvc.perform(patch("/api/members/member/email")
-                .with(user(memberDetails))
+                .with(user(principalDetails))
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -689,10 +691,10 @@ class MemberControllerTest {
             .userEmail("test@gmail.com")
             .role(Role.ROLE_USER)
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         mockMvc.perform(patch("/api/members/member/email")
-                .with(user(memberDetails))
+                .with(user(principalDetails))
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -713,13 +715,13 @@ class MemberControllerTest {
             .userId("test")
             .userPw("qwe12355")
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         when(memberService.modifyPw(eq("test"),
             argThat(r -> r.getNewPw().equals("qwe12345")))).thenReturn(member);
 
         mockMvc.perform(patch("/api/members/member/pw")
-                .with(user(memberDetails))
+                .with(user(principalDetails))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
@@ -764,10 +766,10 @@ class MemberControllerTest {
             .userId("test")
             .userPw("qwe12355")
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         mockMvc.perform(patch("/api/members/member/pw")
-                .with(user(memberDetails))
+                .with(user(principalDetails))
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -788,10 +790,10 @@ class MemberControllerTest {
             .userId("test")
             .userPw("qwe12355")
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         mockMvc.perform(patch("/api/members/member/pw")
-                .with(user(memberDetails))
+                .with(user(principalDetails))
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -807,13 +809,13 @@ class MemberControllerTest {
             .userEmail("test@naver.com")
             .role(Role.ROLE_USER)
             .build();
-        MemberDetails memberDetails = new MemberDetails(member);
+        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
         when(memberService.deleteMember(eq("test"), any(HttpServletRequest.class),
             any(HttpServletResponse.class))).thenReturn(member);
 
         mockMvc.perform(delete("/api/members/member")
-                .with(user(memberDetails)))
+                .with(user(principalDetails)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.userId").value("test"));

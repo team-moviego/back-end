@@ -22,6 +22,7 @@ import com.hwansol.moviego.member.dto.MemberSignupDto.Request;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
 import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
+import com.hwansol.moviego.member.model.OAuthProvider;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
 import java.time.Duration;
@@ -113,6 +114,23 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("이메일 중복 확인 실패 - 카카오 회원인 경우")
+    void duplicatedEmailFail2() {
+        Member member = Member.builder()
+            .userEmail("test@gmail.com")
+            .oAuthProvider(OAuthProvider.KAKAO)
+            .build();
+
+        when(memberRepository.existsByUserEmail(member.getUserEmail())).thenReturn(true);
+        when(memberRepository.findByUserEmail(member.getUserEmail())).thenReturn(
+            Optional.of(member));
+
+        assertThrows(MemberException.class,
+            () -> memberService.duplicatedEmail(member.getUserEmail()),
+            MemberErrorCode.SOCIAL_USER.getMessage());
+    }
+
+    @Test
     @DisplayName("아이디 찾기")
     void findId() {
         Member member = Member.builder()
@@ -135,6 +153,21 @@ class MemberServiceTest {
 
         assertThrows(MemberException.class, () -> memberService.findId("test@naver.com"),
             MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+    }
+
+    @Test
+    @DisplayName("아이디 찾기 실패 - 카카오 회원인 경우")
+    void findIdFail2() {
+        Member member = Member.builder()
+            .userEmail("test@naver.com")
+            .oAuthProvider(OAuthProvider.KAKAO)
+            .build();
+
+        when(memberRepository.findByUserEmail(member.getUserEmail())).thenReturn(
+            Optional.of(member));
+
+        assertThrows(MemberException.class, () -> memberService.findId(member.getUserEmail()),
+            MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
@@ -163,6 +196,22 @@ class MemberServiceTest {
 
         assertThrows(MemberException.class, () -> memberService.findPw("test", "test@naver.com"),
             MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+    }
+
+    @Test
+    @DisplayName("비밀번호 찾기 실패 - 카카오 회원인 경우")
+    void findPwFail2() {
+        Member member = Member.builder()
+            .userId("test")
+            .userEmail("test@naver.com")
+            .oAuthProvider(OAuthProvider.KAKAO)
+            .build();
+
+        when(memberRepository.findByUserId(member.getUserId())).thenReturn(Optional.of(member));
+
+        assertThrows(MemberException.class,
+            () -> memberService.findPw(member.getUserId(), member.getUserEmail()),
+            MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
@@ -477,6 +526,25 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("회원 이메일 변경 서비스 실패 - 카카오 회원인 경우")
+    void modifyEmailFail5() {
+        Member member = Member.builder()
+            .userEmail("test@naver.com")
+            .oAuthProvider(OAuthProvider.KAKAO)
+            .build();
+        MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
+            .newEmail("test@gmail.com")
+            .originEmail("test@naver.com")
+            .build();
+
+        when(memberRepository.findByUserEmail(member.getUserEmail())).thenReturn(
+            Optional.of(member));
+
+        assertThrows(MemberException.class, () -> memberService.modifyEmail(request),
+            MemberErrorCode.SOCIAL_USER.getMessage());
+    }
+
+    @Test
     @DisplayName("회원 비밀번호 변경 서비스")
     void modifyPw() {
         MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
@@ -545,6 +613,26 @@ class MemberServiceTest {
 
         assertThrows(MemberException.class, () -> memberService.modifyPw("test", request),
             MemberErrorCode.DIFF_PW_AND_CONFIRM.getMessage());
+    }
+
+    @Test
+    @DisplayName("회원 비밀번호 변경 서비스 실패 - 카카오 회원인 경우")
+    void modifyPwFail4() {
+        Member member = Member.builder()
+            .userId("test")
+            .oAuthProvider(OAuthProvider.KAKAO)
+            .build();
+        MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
+            .newPw("pa")
+            .originPw("pw")
+            .confirmPw("pa")
+            .build();
+
+        when(memberRepository.findByUserId(member.getUserId())).thenReturn(Optional.of(member));
+
+        assertThrows(MemberException.class,
+            () -> memberService.modifyPw(member.getUserId(), request),
+            MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
