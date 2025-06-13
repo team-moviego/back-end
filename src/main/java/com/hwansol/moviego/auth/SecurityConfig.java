@@ -64,8 +64,7 @@ public class SecurityConfig {
                     }))
 
             .exceptionHandling(exception -> exception.authenticationEntryPoint(
-                    new JwtAuthenticationEntryPoint(objectMapper))
-                .accessDeniedHandler(new JwtAuthDeniedHandler(objectMapper))
+                new JwtAuthenticationEntryPoint(objectMapper))
             ) // 401, 403 에러 핸들러
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .headers(headersConfigurer -> headersConfigurer.frameOptions(
