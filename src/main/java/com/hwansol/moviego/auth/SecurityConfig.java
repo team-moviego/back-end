@@ -58,7 +58,7 @@ public class SecurityConfig {
                 oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
                     .successHandler(oAuth2SuccessHandler)
                     .failureHandler((request, response, exception) -> {
-                        log.error("OAuth2 로그인 실패", exception.get);
+                        log.error("OAuth2 로그인 실패", exception);
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                             "OAuth2 로그인 실패: " + exception.getMessage());
                     }))
