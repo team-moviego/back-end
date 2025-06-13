@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hwansol.moviego.auth.OAuth2SuccessHandler;
 import com.hwansol.moviego.auth.SecurityConfig;
 import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.member.dto.MemberAuthDto.Request;
@@ -25,6 +26,7 @@ import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.PrincipalDetails;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.service.MemberService;
+import com.hwansol.moviego.member.service.OAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +48,12 @@ class MemberControllerTest {
 
     @MockitoBean
     private TokenProvider tokenProvider;
+
+    @MockitoBean
+    private OAuth2UserService oAuth2UserService;
+
+    @MockitoBean
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @MockitoBean
     private MemberService memberService;
