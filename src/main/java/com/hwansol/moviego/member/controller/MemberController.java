@@ -10,7 +10,7 @@ import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
 import com.hwansol.moviego.member.dto.MemberSignupDto;
 import com.hwansol.moviego.member.model.Member;
-import com.hwansol.moviego.member.model.MemberDetails;
+import com.hwansol.moviego.member.model.PrincipalDetails;
 import com.hwansol.moviego.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -105,14 +105,14 @@ public class MemberController {
     /**
      * 회원 조회 컨트롤러
      *
-     * @param memberDetails UserDetails
+     * @param principalDetails PrincipalDetails
      * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
      */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/member")
     public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal
-    MemberDetails memberDetails) {
-        String userId = memberDetails.getUsername();
+    PrincipalDetails principalDetails) {
+        String userId = principalDetails.getUsername();
 
         Member member = memberService.getMember(userId);
         MemberGetDto.Response response = MemberGetDto.Response.from(member);
@@ -215,16 +215,16 @@ public class MemberController {
     /**
      * 회원 비밀번호 변경 컨트롤러
      *
-     * @param request       MemberModifyPwDto.Request
-     * @param memberDetails MemberDetails
+     * @param request          MemberModifyPwDto.Request
+     * @param principalDetails PrincipalDetails
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
      */
     @PreAuthorize("hasRole('USER')")
     @PatchMapping("/member/pw")
     public ResponseEntity<MemberModifyPwDto.Response> modifyPwController(
         @Valid @RequestBody MemberModifyPwDto.Request request,
-        @AuthenticationPrincipal MemberDetails memberDetails) {
-        String userId = memberDetails.getUsername();
+        @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        String userId = principalDetails.getUsername();
         Member member = memberService.modifyPw(userId, request);
         MemberModifyPwDto.Response response = MemberModifyPwDto.Response.from(member);
 
@@ -234,17 +234,18 @@ public class MemberController {
     /**
      * 회원 탈퇴 컨트롤러
      *
-     * @param memberDetails   MemberDetails
-     * @param servletRequest  HttpServletRequest
-     * @param servletResponse HttpServletResponse
+     * @param principalDetails PrincipalDetails
+     * @param servletRequest   HttpServletRequest
+     * @param servletResponse  HttpServletResponse
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러케시지
      */
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/member")
     public ResponseEntity<MemberDeleteDto.Response> deleteMemberController(
-        @AuthenticationPrincipal MemberDetails memberDetails, HttpServletRequest servletRequest,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
+        HttpServletRequest servletRequest,
         HttpServletResponse servletResponse) {
-        String userId = memberDetails.getUsername();
+        String userId = principalDetails.getUsername();
         Member member = memberService.deleteMember(userId, servletRequest, servletResponse);
         MemberDeleteDto.Response response = MemberDeleteDto.Response.from(member);
 

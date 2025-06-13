@@ -3,7 +3,7 @@ package com.hwansol.moviego.member.service;
 import com.hwansol.moviego.member.exception.MemberErrorCode;
 import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.member.model.Member;
-import com.hwansol.moviego.member.model.MemberDetails;
+import com.hwansol.moviego.member.model.PrincipalDetails;
 import com.hwansol.moviego.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +22,6 @@ public class MemberDetailsService implements UserDetailsService {
         Member member = memberRepository.findByUserId(memberId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        return new MemberDetails(member);
+        return new PrincipalDetails(member, null);
     }
 }

@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
@@ -22,7 +21,6 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(toBuilder = true)
-@SQLDelete(sql = "UPDATE member SET del_date = now() WHERE id = ?")
 @SQLRestriction("del_date IS NULL")
 public class Member extends BaseTImeEntity {
 
@@ -42,6 +40,10 @@ public class Member extends BaseTImeEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role; // 권한
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private OAuthProvider oAuthProvider; // 소셜 로그인 사용자 구분
 
     @Column
     private LocalDateTime delDate; // 삭제날짜

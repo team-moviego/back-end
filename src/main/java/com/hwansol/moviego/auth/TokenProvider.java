@@ -208,8 +208,9 @@ public class TokenProvider {
         Cookie cookie = new Cookie(COOKIE_NAME, refreshToken);
 
         cookie.setHttpOnly(true); // js 접근 불가
-        cookie.setSecure(true); // https 외에 통신 불가
+        cookie.setSecure(false); // https 외에 통신 불가 (개발 중에는 false)
         cookie.setMaxAge(86400); // 24시간 후 만료
+        cookie.setPath("/");
 
         response.addCookie(cookie);
     }
