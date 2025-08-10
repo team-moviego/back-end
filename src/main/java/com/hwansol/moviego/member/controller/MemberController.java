@@ -124,10 +124,10 @@ public class MemberController {
     /**
      * 인증번호 이메일 발송 컨트롤러
      *
-     * @param userEmail 회원 이메일
+     * @param request MemberAuthEmailDto.Request
      * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
      */
-    @PostMapping("/auth")
+    @PostMapping("/member/auth")
     public ResponseEntity<String> sendAuthNumController(
             @RequestBody MemberAuthEmailDto.Request request) {
         memberService.sendAuthNum(request);
