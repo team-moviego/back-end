@@ -1,5 +1,7 @@
 package com.hwansol.moviego.member.controller;
 
+import com.hwansol.moviego.member.dto.MemberAuthCheckDto;
+import com.hwansol.moviego.member.dto.MemberAuthMailDto;
 import com.hwansol.moviego.member.dto.MemberDeleteDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
@@ -98,6 +100,32 @@ public class MemberController {
         memberService.findPw(userId, userEmail);
 
         return ResponseEntity.ok("이메일로 임시 비밀번호를 발급하였습니다. 로그인 이후 비밀번호 변경 바랍니다.");
+    }
+
+    /**
+     * 인증번호 이메일 발송 컨트롤러
+     *
+     * @param request MemberAuthMailDto.Request
+     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/member/auth")
+    public ResponseEntity<String> sendAuthMailController(@Valid @RequestBody MemberAuthMailDto.Request request) {
+        memberService.sendAuthNum(request);
+
+        return ResponseEntity.ok("인증번호 이메일을 발송하였습니다.");
+    }
+
+    /**
+     * 인증번호 확인 컨트롤러
+     *
+     * @param request MemberAuthCheckDto.Request
+     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/member/auth-check")
+    public ResponseEntity<String> checkAuthController(@Valid @RequestBody MemberAuthCheckDto.Request request) {
+        memberService.checkAuthNum(request);
+
+        return ResponseEntity.ok("인증번호 인증이 완료되었습니다.");
     }
 
     /**
