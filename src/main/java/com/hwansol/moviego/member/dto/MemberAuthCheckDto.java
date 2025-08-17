@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 // 회원 인증번호 확인 관련 DTO
-public class MemberAuthDto {
+public class MemberAuthCheckDto {
 
     @Getter
     @AllArgsConstructor
