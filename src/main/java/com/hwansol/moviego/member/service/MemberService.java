@@ -2,6 +2,8 @@ package com.hwansol.moviego.member.service;
 
 import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
+import com.hwansol.moviego.member.dto.MemberAuthCheckDto;
+import com.hwansol.moviego.member.dto.MemberAuthMailDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
@@ -15,6 +17,7 @@ import com.hwansol.moviego.member.repository.MemberRepository;
 import com.hwansol.moviego.redis.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -111,6 +114,36 @@ public class MemberService {
     }
 
     /**
+     * 인증번호 이메일 발송 서비스
+     *
+     * @param request - MemberAuthMailDto.Request
+     */
+    public void sendAuthNum(MemberAuthMailDto.Request request) {
+        String authNum = createAuthNum();
+
+        mailService.sendAuthMail(request.getUserEmail(), authNum);
+
+        redisService.setAuthNumToRedis(request.getUserEmail(), authNum);
+        redisService.setIsAuthToRedis(request.getUserEmail(), "false");
+    }
+
+    /**
+     * 인증번호 확인 서비스
+     *
+     * @param request MemberAuthDto.Request
+     */
+    public void checkAuthNum(MemberAuthCheckDto.Request request) {
+        String redisAuthNum = redisService.getRefreshTokenFromRedis(request.getUserEmail());
+
+        if (!redisAuthNum.equals(request.getAuthNum())) {
+            throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
+        }
+
+        redisService.deleteAuthNumFromRedis(request.getUserEmail());
+        redisService.setIsAuthToRedis(request.getUserEmail(), "true");
+    }
+
+    /**
      * 회원 조회 서비스
      *
      * @param userId 조회할 회원 아이디
@@ -159,10 +192,10 @@ public class MemberService {
         }
 
         tokenProvider.generateRefreshToken(member.getUserId(), List.of(member.getRole().getName()),
-                                           response);
+                response);
 
         return tokenProvider.generateAccessToken(member.getUserId(),
-                                                 List.of(member.getRole().getName()));
+                List.of(member.getRole().getName()));
     }
 
     /**
@@ -301,5 +334,13 @@ public class MemberService {
         }
 
         return member;
+    }
+
+    // 인증번호 생성 메소드
+    private String createAuthNum() {
+        SecureRandom sr = new SecureRandom();
+        int random = sr.nextInt(1_000_000); // 1~999999 랜덤 수 생성
+
+        return String.format("%06d", random); // 앞자리 0을 포함한 6자리 문자열로 반환
     }
 }

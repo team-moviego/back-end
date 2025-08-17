@@ -2,14 +2,10 @@ package com.hwansol.moviego.mail.service;
 
 import com.hwansol.moviego.mail.exception.MailErrorCode;
 import com.hwansol.moviego.mail.exception.MailException;
-import com.hwansol.moviego.member.dto.MemberAuthDto;
-import com.hwansol.moviego.member.exception.MemberErrorCode;
-import com.hwansol.moviego.member.exception.MemberException;
 import com.hwansol.moviego.redis.service.RedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,33 +46,13 @@ public class MailService {
     }
 
     /**
-     * 인증번호 이메일 발송 서비스
+     * 인증번호 이메일 발송
      *
-     * @param userEmail - 인증번호 발송할 회원 이메일 주소
+     * @param userEmail 받는 이메일
+     * @param authNum   인증 번호
      */
-    public void sendAuthNum(String userEmail) {
-        String authNum = createAuthNum();
-
+    public void sendAuthMail(String userEmail, String authNum) {
         sendEmail(userEmail, authNum, MailType.AUTH);
-
-        redisService.setAuthNumToRedis(userEmail, authNum);
-        redisService.setIsAuthToRedis(userEmail, "false");
-    }
-
-    /**
-     * 인증번호 확인 서비스
-     *
-     * @param request MemberAuthDto.Request
-     */
-    public void checkAuthNum(MemberAuthDto.Request request) {
-        String redisAuthNum = redisService.getRefreshTokenFromRedis(request.getUserEmail());
-
-        if (!redisAuthNum.equals(request.getAuthNum())) {
-            throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
-        }
-
-        redisService.deleteAuthNumFromRedis(request.getUserEmail());
-        redisService.setIsAuthToRedis(request.getUserEmail(), "true");
     }
 
     // 이메일 전송
@@ -143,13 +119,5 @@ public class MailService {
         body += "<h1>" + content + "</h1>";
         body += "<h3>감사합니다.</h3>";
         return body;
-    }
-
-    // 인증번호 생성 메소드
-    private String createAuthNum() {
-        SecureRandom sr = new SecureRandom();
-        int random = sr.nextInt(1_000_000); // 1~999999 랜덤 수 생성
-
-        return String.format("%06d", random); // 앞자리 0을 포함한 6자리 문자열로 반환
     }
 }
