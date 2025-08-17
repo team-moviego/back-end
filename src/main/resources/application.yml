@@ -56,6 +56,10 @@ spring:
   # jwt
   jwt:
     secret: ${JWT_SECRET}
+    access:
+      expire: 900000
+    refresh:
+      expire: 86400000
 
   security:
     oauth2:
@@ -77,6 +81,20 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+  # multipart
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+r2:
+  bucketName: ${R2_BUCKET_NAME}
+  endpointUrl: ${R2_ENDPOINT_URL}
+  region: APAC
+  accessKey: ${R2_ACCESS_KEY}
+  secretKey: ${R2_SECRET_KEY}
 
 logging:
   level:
