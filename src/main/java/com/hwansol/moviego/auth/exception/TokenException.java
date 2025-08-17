@@ -1,4 +1,4 @@
-package com.hwansol.moviego.auth;
+package com.hwansol.moviego.auth.exception;
 
 import lombok.Getter;
 
@@ -11,5 +11,4 @@ public class TokenException extends RuntimeException {
         super(tokenErrorCode.getMessage());
         this.tokenErrorCode = tokenErrorCode;
     }
-
 }
