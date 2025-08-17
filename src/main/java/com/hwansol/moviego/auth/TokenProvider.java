@@ -1,18 +1,20 @@
 package com.hwansol.moviego.auth;
 
+import com.hwansol.moviego.auth.exception.TokenErrorCode;
+import com.hwansol.moviego.auth.exception.TokenException;
+import com.hwansol.moviego.cookie.service.CookieService;
 import com.hwansol.moviego.member.service.MemberDetailsService;
+import com.hwansol.moviego.redis.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.Key;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,15 +35,21 @@ import org.springframework.util.StringUtils;
 public class TokenProvider {
 
     private static final String KEY_ROLES = "roles";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1hour
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 24 * 1000 * 60 * 60; // 24hour
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
-    private static final String COOKIE_NAME = "refreshToken";
+
     private final MemberDetailsService memberDetailsService;
+    private final CookieService cookieService;
+    private final RedisService redisService;
 
     @Value("${spring.jwt.secret}")
     private String secret;
+
+    @Value("${spring.jwt.access.expire")
+    private long accessTokenExpire;
+
+    @Value("${spring.jwt.refresh.expire")
+    private long refreshTokenExpire;
 
     /**
      * accessToken 생성
@@ -50,7 +59,7 @@ public class TokenProvider {
      * @return 생성된 accessToken
      */
     public String generateAccessToken(String memberId, List<String> roles) {
-        return createToken(memberId, roles, ACCESS_TOKEN_EXPIRE_TIME);
+        return createToken(memberId, roles, accessTokenExpire);
     }
 
     /**
@@ -61,41 +70,27 @@ public class TokenProvider {
      * @param httpServletResponse HttpServletResponse
      */
     public void generateRefreshToken(String memberId, List<String> roles,
-        HttpServletResponse httpServletResponse) {
-        String refreshToken = createToken(memberId, roles, REFRESH_TOKEN_EXPIRE_TIME);
-        tokenToCookie(refreshToken, httpServletResponse);
-    }
-
-    /**
-     * accessToken 재발급
-     *
-     * @param request  HttpServletRequest
-     * @param response HttpServletResponse
-     * @return 재발급된 accessToken
-     */
-    public String reGenerateAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = getRefreshTokenFromCookie(request);
-
-        if (!validateToken(refreshToken)) { // refreshToken이 만료된 경우
-            throw new TokenException(TokenErrorCode.EXPIRED_REFRESH_TOKEN);
-        }
-
-        String memberId = getMemberId(refreshToken);
-        List<String> roles = getMemberRole(refreshToken);
-
-        generateRefreshToken(memberId, roles, response); // 새로운 refreshToken 발급 후 쿠키에 저장
-
-        return generateAccessToken(memberId, roles); // 새로운 accessToken 발급
+                                     HttpServletResponse httpServletResponse) {
+        String refreshToken = createToken(memberId, roles, refreshTokenExpire);
+        cookieService.setCookieToHttpResponse(httpServletResponse, refreshToken, refreshTokenExpire);
+        redisService.setRefreshTokenToRedis(memberId, refreshToken);
     }
 
     /**
      * 로그아웃
      *
+     * @param userId   회원 아이디
      * @param request  HttpServletRequest
      * @param response HttpServletResponse
      */
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-        deleteRefreshToken(request, response); // refreshToken을 쿠키에서 지움
+    public void logout(String userId, HttpServletRequest request, HttpServletResponse response) {
+        Cookie refreshTokenCookie = cookieService.getRefreshTokenCookie(request);
+        String refreshToken = refreshTokenCookie.getValue();
+
+        cookieService.deleteRefreshTokenCookie(request, response); // refreshToken을 쿠키에서 지움
+        redisService.deleteRefreshTokenFromRedis(userId);
+
+        SecurityContextHolder.clearContext();
     }
 
     /**
@@ -109,7 +104,7 @@ public class TokenProvider {
         UserDetails userDetails = memberDetailsService.loadUserByUsername(getMemberId(jwt));
 
         return new UsernamePasswordAuthenticationToken(userDetails, "",
-            userDetails.getAuthorities());
+                                                       userDetails.getAuthorities());
     }
 
     /**
@@ -174,13 +169,12 @@ public class TokenProvider {
     private Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+                    .setSigningKey(getSecretKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (ExpiredJwtException e) {
-            log.error("토큰 정보 에러 = {}", e.getMessage());
-            throw new TokenException(TokenErrorCode.EXPIRED_ACCESS_TOKEN);
+            throw new TokenException(TokenErrorCode.EXPIRED_TOKEN);
         }
     }
 
@@ -192,59 +186,12 @@ public class TokenProvider {
         Date now = new Date(); // 현재 날짜
         Date expiredDate = new Date(now.getTime() + tokenExpiredTime); // 만료 날짜
 
-        Key KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-
         return Jwts.builder()
-            .setClaims(claims)
-            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-            .setIssuedAt(now) // 생성 날짜
-            .setExpiration(expiredDate) // 만료 날짜
-            .signWith(getSecretKey())
-            .compact();
-    }
-
-    // refreshToken 쿠키에 저장하는 메소드
-    private void tokenToCookie(String refreshToken, HttpServletResponse response) {
-        Cookie cookie = new Cookie(COOKIE_NAME, refreshToken);
-
-        cookie.setHttpOnly(true); // js 접근 불가
-        cookie.setSecure(false); // https 외에 통신 불가 (개발 중에는 false)
-        cookie.setMaxAge(86400); // 24시간 후 만료
-        cookie.setPath("/");
-
-        response.addCookie(cookie);
-    }
-
-    // 쿠키에서 refreshToken 삭제하는 메소드
-    private void deleteRefreshToken(HttpServletRequest request, HttpServletResponse response) {
-        Cookie cookie = findCookie(request);
-
-        cookie.setMaxAge(0); // 바로 만료시킴
-        response.addCookie(cookie);
-    }
-
-    // 쿠키에 저장된 refreshToken 가져오는 메소드
-    private String getRefreshTokenFromCookie(HttpServletRequest request) {
-        Cookie cookie = findCookie(request);
-
-        return cookie.getValue();
-    }
-
-    // refreshToken 정보가 담긴 쿠키 찾는 메소드
-    private Cookie findCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) { // refreshToken이 존재하지 않는 경우
-            throw new TokenException(TokenErrorCode.NOT_FOUND_REFRESH_TOKEN);
-        }
-
-        Cookie cookie = Arrays.stream(request.getCookies())
-            .filter(c -> c.getName().equals(COOKIE_NAME))
-            .findAny()
-            .orElse(null);
-
-        if (cookie == null) { // 해당 쿠키가 존재하지 않는 경우
-            throw new TokenException(TokenErrorCode.NOT_FOUND_REFRESH_TOKEN);
-        }
-
-        return cookie;
+                .setClaims(claims)
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+                .setIssuedAt(now) // 생성 날짜
+                .setExpiration(expiredDate) // 만료 날짜
+                .signWith(getSecretKey())
+                .compact();
     }
 }
