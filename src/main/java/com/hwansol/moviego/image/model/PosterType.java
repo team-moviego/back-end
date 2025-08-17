@@ -1,4 +1,4 @@
-package com.hwansol.moviego.file.model;
+package com.hwansol.moviego.image.model;
 
 import com.hwansol.moviego.aop.EnumCreator;
 import lombok.AllArgsConstructor;

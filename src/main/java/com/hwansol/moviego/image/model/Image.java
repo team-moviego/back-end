@@ -1,4 +1,4 @@
-package com.hwansol.moviego.file.model;
+package com.hwansol.moviego.image.model;
 
 import com.hwansol.moviego.config.BaseTImeEntity;
 import com.hwansol.moviego.movie.model.Movie;
@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
@@ -53,6 +54,24 @@ public class Image extends BaseTImeEntity {
 
     @Column
     private LocalDateTime deletedAt;
+
+    @Builder
+    public Image(String originImageName, String storeImageName, String extension, String url, long size, PosterType posterType, Movie movie, LocalDateTime deletedAt) {
+        boolean isValidateDataFail = originImageName == null || originImageName.isBlank() || storeImageName == null || storeImageName.isBlank() || url == null || url.isBlank() || size <= 0 || posterType == null;
+
+        if (isValidateDataFail) {
+            throw new IllegalArgumentException("Image 생성 실패");
+        }
+
+        this.originImageName = originImageName;
+        this.storeImageName = storeImageName;
+        this.extension = extension;
+        this.url = url;
+        this.size = size;
+        this.posterType = posterType;
+        this.movie = movie;
+        this.deletedAt = deletedAt;
+    }
 
     public void relatedMovie(Movie movie) {
         if (this.movie != null) {
