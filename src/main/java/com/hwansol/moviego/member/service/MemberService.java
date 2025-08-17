@@ -2,8 +2,6 @@ package com.hwansol.moviego.member.service;
 
 import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
-import com.hwansol.moviego.mail.service.MailType;
-import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
@@ -14,32 +12,26 @@ import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.OAuthProvider;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
+import com.hwansol.moviego.redis.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.security.SecureRandom;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-//todo: 카카오 회원인지 구분하는 로직 구현 필요
 public class MemberService {
 
-    private static final String AUTH_NUM_KEY = "auth:";
-    private static final String IS_AUTH_KEY = "isAuth:";
-
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
-    private final RedisTemplate<String, String> redisTemplate;
     private final MemberRepository memberRepository;
+    private final MailService mailService;
     private final TokenProvider tokenProvider;
+    private final RedisService redisService;
 
     /**
      * 아이디 중복 확인 서비스
@@ -66,7 +58,7 @@ public class MemberService {
 
         if (isDuplicated) {
             Member member = memberRepository.findByUserEmail(userEmail)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                    .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
             isKakaoUser(member);
 
@@ -83,12 +75,12 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member findId(String userEmail) {
         Member member = memberRepository.findByUserEmail(userEmail)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         isKakaoUser(member);
 
         String userId = member.getUserId();
-        mailService.sendEmail(userEmail, userId, MailType.ID);
+        mailService.sendIdMail(userEmail, userId);
 
         return member;
     }
@@ -102,7 +94,7 @@ public class MemberService {
     @Transactional
     public void findPw(String userId, String userEmail) {
         Member member = memberRepository.findByUserId(userId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         isKakaoUser(member);
 
@@ -110,12 +102,12 @@ public class MemberService {
         String newPw = passwordEncoder.encode(temporaryPw);
 
         member = member.toBuilder()
-            .userPw(newPw)
-            .build();
+                .userPw(newPw)
+                .build();
 
         memberRepository.save(member);
 
-        mailService.sendEmail(userEmail, temporaryPw, MailType.PW);
+        mailService.sendPwMail(userEmail, temporaryPw);
     }
 
     /**
@@ -127,40 +119,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-    }
-
-    /**
-     * 인증번호 이메일 발송 서비스
-     *
-     * @param userEmail - 인증번호 발송할 회원 이메일 주소
-     */
-    public void sendAuthNum(String userEmail) {
-        String authNum = createAuthNum();
-        redisTemplate.opsForValue().set(AUTH_NUM_KEY + userEmail, authNum, Duration.ofMinutes(5));
-        redisTemplate.opsForValue().set(IS_AUTH_KEY + userEmail, "false", Duration.ofMinutes(5));
-
-        mailService.sendEmail(userEmail, authNum, MailType.AUTH);
-    }
-
-    /**
-     * 인증번호 확인 서비스
-     *
-     * @param request MemberAuthDto.Request
-     */
-    public void checkAuthNum(MemberAuthDto.Request request) {
-        String originAuthNum = redisTemplate.opsForValue()
-            .get(AUTH_NUM_KEY + request.getUserEmail());
-
-        if (originAuthNum == null) {
-            throw new MemberException(MemberErrorCode.TIME_OVER_AUTH);
-        }
-
-        if (!originAuthNum.equals(request.getAuthNum())) {
-            throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
-        }
-
-        redisTemplate.opsForValue().set(IS_AUTH_KEY + request.getUserEmail(), "true");
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
 
     /**
@@ -175,11 +134,11 @@ public class MemberService {
         String encodedPw = passwordEncoder.encode(request.getUserPw());
 
         Member member = Member.builder()
-            .userId(request.getUserId())
-            .userPw(encodedPw)
-            .userEmail(request.getUserEmail())
-            .role(Role.ROLE_USER)
-            .build();
+                .userId(request.getUserId())
+                .userPw(encodedPw)
+                .userEmail(request.getUserEmail())
+                .role(Role.ROLE_USER)
+                .build();
 
         return memberRepository.save(member);
     }
@@ -193,27 +152,28 @@ public class MemberService {
      */
     public String signIn(MemberSignInDto.Request request, HttpServletResponse response) {
         Member member = memberRepository.findByUserId(request.getUserId())
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if (!passwordEncoder.matches(request.getUserPw(), member.getUserPw())) {
             throw new MemberException(MemberErrorCode.WRONG_PASSWORD);
         }
 
         tokenProvider.generateRefreshToken(member.getUserId(), List.of(member.getRole().getName()),
-            response);
+                                           response);
 
         return tokenProvider.generateAccessToken(member.getUserId(),
-            List.of(member.getRole().getName()));
+                                                 List.of(member.getRole().getName()));
     }
 
     /**
      * 회원 로그아웃 서비스
      *
+     * @param userId   회원 아이디
      * @param request  ServletRequest
      * @param response ServletResponse
      */
-    public void signOut(HttpServletRequest request, HttpServletResponse response) {
-        tokenProvider.logout(request, response);
+    public void signOut(String userId, HttpServletRequest request, HttpServletResponse response) {
+        tokenProvider.logout(userId, request, response);
     }
 
     /**
@@ -226,8 +186,8 @@ public class MemberService {
         Member member = validatedInModifyEmail(request);
 
         member = member.toBuilder()
-            .userEmail(request.getNewEmail())
-            .build();
+                .userEmail(request.getNewEmail())
+                .build();
 
         return memberRepository.save(member);
     }
@@ -245,8 +205,8 @@ public class MemberService {
         String encodedPw = passwordEncoder.encode(request.getNewPw());
 
         member = member.toBuilder()
-            .userPw(encodedPw)
-            .build();
+                .userPw(encodedPw)
+                .build();
 
         return memberRepository.save(member);
     }
@@ -260,16 +220,20 @@ public class MemberService {
      * @return 탈퇴 처리된 회원 엔티티
      */
     public Member deleteMember(String userId, HttpServletRequest request,
-        HttpServletResponse response) {
+                               HttpServletResponse response) {
         Member member = memberRepository.findByUserId(userId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        if (member.getDeletedAt() != null) {
+            throw new MemberException(MemberErrorCode.ALREADY_DELETED);
+        }
 
         member = member.toBuilder()
-            .delDate(LocalDateTime.now())
-            .build();
+                .deletedAt(LocalDateTime.now())
+                .build();
         Member result = memberRepository.save(member);
 
-        tokenProvider.logout(request, response);
+        tokenProvider.logout(userId, request, response);
 
         return result;
     }
@@ -277,22 +241,14 @@ public class MemberService {
     // 카카오 회원 판별 메소드
     private void isKakaoUser(Member member) {
         if (member.getOAuthProvider() != null && member.getOAuthProvider()
-            .equals(OAuthProvider.KAKAO)) {
+                .equals(OAuthProvider.KAKAO)) {
             throw new MemberException(MemberErrorCode.SOCIAL_USER);
         }
     }
 
-    // 인증번호 생성 메소드
-    private String createAuthNum() {
-        SecureRandom sr = new SecureRandom();
-        int random = sr.nextInt(1_000_000); // 1~999999 랜덤 수 생성
-
-        return String.format("%06d", random); // 앞자리 0을 포함한 6자리 문자열로 반환
-    }
-
     // 회원가입 시 validate를 위한 메소드
     private void validatedInSignUp(MemberSignupDto.Request request) {
-        String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY + request.getUserEmail());
+        String isAuth = redisService.getIsAuthFromRedis(request.getUserEmail());
         if (isAuth == null || !isAuth.equals("true")) {
             throw new MemberException(MemberErrorCode.NOT_COMPLETED_AUTH);
         }
@@ -301,13 +257,13 @@ public class MemberService {
             throw new MemberException(MemberErrorCode.DIFF_PW_AND_CONFIRM);
         }
 
-        redisTemplate.delete(IS_AUTH_KEY + request.getUserEmail());
+        redisService.deleteIsAuthFromRedis(request.getUserEmail());
     }
 
     // 회원 이메일 변경 시 validate를 위한 메소드
     private Member validatedInModifyEmail(MemberModifyEmailDto.Request request) {
         Member member = memberRepository.findByUserEmail(request.getOriginEmail())
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         isKakaoUser(member);
 
@@ -319,12 +275,12 @@ public class MemberService {
             throw new MemberException(MemberErrorCode.DUPLICATED_EMAIL);
         }
 
-        String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY + request.getNewEmail());
-        if (isAuth == null || !isAuth.equals("true")) {
+        String isAuth = redisService.getIsAuthFromRedis(request.getNewEmail());
+        if (!isAuth.equals("true")) {
             throw new MemberException(MemberErrorCode.NOT_COMPLETED_AUTH);
         }
 
-        redisTemplate.delete(IS_AUTH_KEY + request.getNewEmail());
+        redisService.deleteIsAuthFromRedis(request.getNewEmail());
 
         return member;
     }
@@ -332,7 +288,7 @@ public class MemberService {
     // 회원 비밀번호 변경 시 validate를 위한 메소드
     private Member validatedInModifyPw(String userId, MemberModifyPwDto.Request request) {
         Member member = memberRepository.findByUserId(userId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         isKakaoUser(member);
 
