@@ -1,6 +1,5 @@
 package com.hwansol.moviego.member.controller;
 
-import com.hwansol.moviego.member.dto.MemberAuthDto;
 import com.hwansol.moviego.member.dto.MemberDeleteDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
@@ -20,7 +19,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,7 +47,7 @@ public class MemberController {
      */
     @GetMapping("/member/id/{userId}")
     public ResponseEntity<String> isDuplicatedId(
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 또는 영문 + 숫자 조합으로 작성해야 합니다.") @PathVariable String userId) {
+            @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 또는 영문 + 숫자 조합으로 작성해야 합니다.") @PathVariable String userId) {
         memberService.duplicatedId(userId);
 
         return ResponseEntity.ok("사용가능한 아이디입니다.");
@@ -63,7 +61,7 @@ public class MemberController {
      */
     @GetMapping("/member/email/{userEmail}")
     public ResponseEntity<String> isDuplicatedEmail(
-        @NotBlank(message = "이메일을 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @PathVariable String userEmail) {
+            @NotBlank(message = "이메일을 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @PathVariable String userEmail) {
         memberService.duplicatedEmail(userEmail);
 
         return ResponseEntity.ok("사용가능한 이메일입니다.");
@@ -77,8 +75,8 @@ public class MemberController {
      */
     @GetMapping("/member/id")
     public ResponseEntity<MemberFindIdDto.Response> findIdController(
-        @NotBlank(message = "이메일을 입력해주세요.")
-        @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
+            @NotBlank(message = "이메일을 입력해주세요.")
+            @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
         Member member = memberService.findId(userEmail);
 
         Response response = Response.from(member);
@@ -95,8 +93,8 @@ public class MemberController {
      */
     @GetMapping("/member/pw")
     public ResponseEntity<String> findPwController(
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 또는 영문 + 숫자 조합으로 작성해야 합니다.") @RequestParam String userId,
-        @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
+            @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]*$", message = "아이디는 영문 또는 영문 + 숫자 조합으로 작성해야 합니다.") @RequestParam String userId,
+            @NotBlank(message = "아이디를 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
         memberService.findPw(userId, userEmail);
 
         return ResponseEntity.ok("이메일로 임시 비밀번호를 발급하였습니다. 로그인 이후 비밀번호 변경 바랍니다.");
@@ -108,43 +106,14 @@ public class MemberController {
      * @param principalDetails PrincipalDetails
      * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/member")
-    public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal
-    PrincipalDetails principalDetails) {
+    public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         String userId = principalDetails.getUsername();
 
         Member member = memberService.getMember(userId);
         MemberGetDto.Response response = MemberGetDto.Response.from(member);
 
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 인증번호 이메일 발송 컨트롤러
-     *
-     * @param userEmail 회원 이메일
-     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
-     */
-    @PostMapping("/auth")
-    public ResponseEntity<String> sendAuthNumController(
-        @NotBlank(message = "이메일을 입력해주세요.") @Pattern(regexp = "^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$", message = "올바른 이메일 형식을 입력해주세요.") @RequestParam String userEmail) {
-        memberService.sendAuthNum(userEmail);
-
-        return ResponseEntity.ok("인증번호가 전송되었습니다.");
-    }
-
-    /**
-     * 인증번호 확인 컨트롤러
-     *
-     * @param request MemberAuthDto.Request
-     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
-     */
-    @PostMapping("/member/auth-check")
-    public ResponseEntity<String> checkAuthNum(@Valid @RequestBody MemberAuthDto.Request request) {
-        memberService.checkAuthNum(request);
-
-        return ResponseEntity.ok("이메일 인증에 성공하셨습니다.");
     }
 
     /**
@@ -155,12 +124,12 @@ public class MemberController {
      */
     @PostMapping("/member/signup")
     public ResponseEntity<MemberSignupDto.Response> signupController(
-        @Valid @RequestBody MemberSignupDto.Request request) {
+            @Valid @RequestBody MemberSignupDto.Request request) {
         Member member = memberService.signup(request);
         MemberSignupDto.Response response = MemberSignupDto.Response.from(member);
 
         return ResponseEntity.status(HttpStatus.CREATED.value())
-            .body(response);
+                .body(response);
     }
 
     /**
@@ -172,10 +141,10 @@ public class MemberController {
      */
     @PostMapping("/member/signin")
     public ResponseEntity<MemberSignInDto.Response> signInController(
-        @Valid @RequestBody MemberSignInDto.Request request, HttpServletResponse servletResponse) {
+            @Valid @RequestBody MemberSignInDto.Request request, HttpServletResponse servletResponse) {
         String accessToken = memberService.signIn(request, servletResponse);
         MemberSignInDto.Response response = MemberSignInDto.Response.from(request.getUserId(),
-            accessToken);
+                accessToken);
 
         return ResponseEntity.ok(response);
     }
@@ -187,11 +156,11 @@ public class MemberController {
      * @param response HttpServletResponse
      * @return 성공 시 200 코드와 성공메시지, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @PostMapping("/member/signout")
-    public ResponseEntity<String> signOutController(HttpServletRequest request,
-        HttpServletResponse response) {
-        memberService.signOut(request, response);
+    public ResponseEntity<String> signOutController(@AuthenticationPrincipal PrincipalDetails principalDetails, HttpServletRequest request,
+                                                    HttpServletResponse response) {
+        String userId = principalDetails.getUsername();
+        memberService.signOut(userId, request, response);
 
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
@@ -202,10 +171,9 @@ public class MemberController {
      * @param request MemberModifyEmailDto.Request
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @PatchMapping("/member/email")
     public ResponseEntity<MemberModifyEmailDto.Response> modifyEmailController(
-        @Valid @RequestBody MemberModifyEmailDto.Request request) {
+            @Valid @RequestBody MemberModifyEmailDto.Request request) {
         Member member = memberService.modifyEmail(request);
         MemberModifyEmailDto.Response response = MemberModifyEmailDto.Response.from(member);
 
@@ -219,11 +187,10 @@ public class MemberController {
      * @param principalDetails PrincipalDetails
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @PatchMapping("/member/pw")
     public ResponseEntity<MemberModifyPwDto.Response> modifyPwController(
-        @Valid @RequestBody MemberModifyPwDto.Request request,
-        @AuthenticationPrincipal PrincipalDetails principalDetails) {
+            @Valid @RequestBody MemberModifyPwDto.Request request,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
         String userId = principalDetails.getUsername();
         Member member = memberService.modifyPw(userId, request);
         MemberModifyPwDto.Response response = MemberModifyPwDto.Response.from(member);
@@ -239,12 +206,11 @@ public class MemberController {
      * @param servletResponse  HttpServletResponse
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러케시지
      */
-    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/member")
     public ResponseEntity<MemberDeleteDto.Response> deleteMemberController(
-        @AuthenticationPrincipal PrincipalDetails principalDetails,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse) {
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
         String userId = principalDetails.getUsername();
         Member member = memberService.deleteMember(userId, servletRequest, servletResponse);
         MemberDeleteDto.Response response = MemberDeleteDto.Response.from(member);
