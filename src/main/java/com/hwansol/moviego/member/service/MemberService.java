@@ -133,7 +133,7 @@ public class MemberService {
      * @param request MemberAuthDto.Request
      */
     public void checkAuthNum(MemberAuthCheckDto.Request request) {
-        String redisAuthNum = redisService.getRefreshTokenFromRedis(request.getUserEmail());
+        String redisAuthNum = redisService.getAuthNumFromRedis(request.getUserEmail());
 
         if (!redisAuthNum.equals(request.getAuthNum())) {
             throw new MemberException(MemberErrorCode.WRONG_AUTH_NUM);
