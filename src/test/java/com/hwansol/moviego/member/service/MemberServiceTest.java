@@ -5,15 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hwansol.moviego.auth.TokenProvider;
 import com.hwansol.moviego.mail.service.MailService;
-import com.hwansol.moviego.mail.service.MailType;
-import com.hwansol.moviego.member.dto.MemberAuthDto;
+import com.hwansol.moviego.member.dto.MemberAuthCheckDto;
+import com.hwansol.moviego.member.dto.MemberAuthMailDto;
 import com.hwansol.moviego.member.dto.MemberModifyEmailDto;
 import com.hwansol.moviego.member.dto.MemberModifyPwDto;
 import com.hwansol.moviego.member.dto.MemberSignInDto;
@@ -25,7 +24,7 @@ import com.hwansol.moviego.member.model.Member;
 import com.hwansol.moviego.member.model.OAuthProvider;
 import com.hwansol.moviego.member.model.Role;
 import com.hwansol.moviego.member.repository.MemberRepository;
-import java.time.Duration;
+import com.hwansol.moviego.redis.service.RedisService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,12 +48,6 @@ class MemberServiceTest {
     private MailService mailService;
 
     @Mock
-    private RedisTemplate<String, String> redisTemplate;
-
-    @Mock
-    private ValueOperations<String, String> valueOperations;
-
-    @Mock
     private MemberRepository memberRepository;
 
     @Mock
@@ -67,6 +58,9 @@ class MemberServiceTest {
 
     @Mock
     private MockHttpServletRequest mockHttpServletRequest;
+
+    @Mock
+    private RedisService redisService;
 
     @InjectMocks
     private MemberService memberService;
@@ -89,7 +83,7 @@ class MemberServiceTest {
         when(memberRepository.existsByUserId(userId)).thenReturn(true);
 
         assertThrows(MemberException.class, () -> memberService.duplicatedId(userId),
-            MemberErrorCode.DUPLICATED_ID.getMessage());
+                MemberErrorCode.DUPLICATED_ID.getMessage());
     }
 
     @Test
@@ -110,36 +104,36 @@ class MemberServiceTest {
         when(memberRepository.existsByUserEmail(userEmail)).thenReturn(true);
 
         assertThrows(MemberException.class, () -> memberService.duplicatedEmail(userEmail),
-            MemberErrorCode.DUPLICATED_EMAIL.getMessage());
+                MemberErrorCode.DUPLICATED_EMAIL.getMessage());
     }
 
     @Test
     @DisplayName("이메일 중복 확인 실패 - 카카오 회원인 경우")
     void duplicatedEmailFail2() {
         Member member = Member.builder()
-            .userEmail("test@gmail.com")
-            .oAuthProvider(OAuthProvider.KAKAO)
-            .build();
+                .userEmail("test@gmail.com")
+                .oAuthProvider(OAuthProvider.KAKAO)
+                .build();
 
         when(memberRepository.existsByUserEmail(member.getUserEmail())).thenReturn(true);
         when(memberRepository.findByUserEmail(member.getUserEmail())).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
 
         assertThrows(MemberException.class,
-            () -> memberService.duplicatedEmail(member.getUserEmail()),
-            MemberErrorCode.SOCIAL_USER.getMessage());
+                () -> memberService.duplicatedEmail(member.getUserEmail()),
+                MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
     @DisplayName("아이디 찾기")
     void findId() {
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .userId("test")
-            .build();
+                .userEmail("test@naver.com")
+                .userId("test")
+                .build();
 
         when(memberRepository.findByUserEmail("test@naver.com")).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
 
         Member result = memberService.findId("test@naver.com");
 
@@ -152,31 +146,31 @@ class MemberServiceTest {
         when(memberRepository.findByUserEmail("test@naver.com")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class, () -> memberService.findId("test@naver.com"),
-            MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+                MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
     @Test
     @DisplayName("아이디 찾기 실패 - 카카오 회원인 경우")
     void findIdFail2() {
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .oAuthProvider(OAuthProvider.KAKAO)
-            .build();
+                .userEmail("test@naver.com")
+                .oAuthProvider(OAuthProvider.KAKAO)
+                .build();
 
         when(memberRepository.findByUserEmail(member.getUserEmail())).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
 
         assertThrows(MemberException.class, () -> memberService.findId(member.getUserEmail()),
-            MemberErrorCode.SOCIAL_USER.getMessage());
+                MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
     @DisplayName("비밀번호 찾기")
     void findPw() {
         Member member = Member.builder()
-            .userId("test")
-            .userPw("abc12345")
-            .build();
+                .userId("test")
+                .userPw("abc12345")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
         when(passwordEncoder.encode(argThat(s -> s.length() == 8))).thenReturn("Pds83iL2");
@@ -184,9 +178,6 @@ class MemberServiceTest {
         memberService.findPw("test", "test@naver.com");
 
         verify(memberRepository, times(1)).save(argThat(m -> m.getUserPw().equals("Pds83iL2")));
-        verify(mailService, times(1)).sendEmail(argThat(m -> m.equals("test@naver.com")),
-            argThat(s -> s.length() == 8),
-            argThat(e -> e.name().equals("PW")));
     }
 
     @Test
@@ -195,31 +186,61 @@ class MemberServiceTest {
         when(memberRepository.findByUserId("test")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class, () -> memberService.findPw("test", "test@naver.com"),
-            MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+                MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
     @Test
     @DisplayName("비밀번호 찾기 실패 - 카카오 회원인 경우")
     void findPwFail2() {
         Member member = Member.builder()
-            .userId("test")
-            .userEmail("test@naver.com")
-            .oAuthProvider(OAuthProvider.KAKAO)
-            .build();
+                .userId("test")
+                .userEmail("test@naver.com")
+                .oAuthProvider(OAuthProvider.KAKAO)
+                .build();
 
         when(memberRepository.findByUserId(member.getUserId())).thenReturn(Optional.of(member));
 
         assertThrows(MemberException.class,
-            () -> memberService.findPw(member.getUserId(), member.getUserEmail()),
-            MemberErrorCode.SOCIAL_USER.getMessage());
+                () -> memberService.findPw(member.getUserId(), member.getUserEmail()),
+                MemberErrorCode.SOCIAL_USER.getMessage());
+    }
+
+    @Test
+    @DisplayName("인증번호 이메일 발송 서비스")
+    void sendAuthNum() {
+        MemberAuthMailDto.Request request = MemberAuthMailDto.Request.builder()
+                .userEmail("test@naver.com")
+                .build();
+
+        memberService.sendAuthNum(request);
+
+        verify(mailService, times(1)).sendAuthMail(eq("test@naver.com"), argThat(s -> s.length() == 6));
+        verify(redisService, times(1)).setAuthNumToRedis(eq("test@naver.com"), argThat(s -> s.length() == 6));
+        verify(redisService, times(1)).setIsAuthToRedis("test@naver.com", "false");
+    }
+
+    @Test
+    @DisplayName("인증번호 확인 서비스")
+    void checkAuthNum() {
+        MemberAuthCheckDto.Request request = MemberAuthCheckDto.Request.builder()
+                .authNum("123456")
+                .userEmail("test@naver.com")
+                .build();
+
+        when(redisService.getAuthNumFromRedis("test@naver.com")).thenReturn("123456");
+
+        memberService.checkAuthNum(request);
+
+        verify(redisService, times(1)).deleteAuthNumFromRedis("test@naver.com");
+        verify(redisService, times(1)).setIsAuthToRedis("test@naver.com", "true");
     }
 
     @Test
     @DisplayName("회원 조회")
     void getMember() {
         Member member = Member.builder()
-            .userId("test")
-            .build();
+                .userId("test")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
 
@@ -234,93 +255,26 @@ class MemberServiceTest {
         when(memberRepository.findByUserId("test")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class, () -> memberService.getMember("test"),
-            MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
-    }
-
-    @Test
-    @DisplayName("인증번호 이메일 발송")
-    void sendAuthNum() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        doNothing().when(valueOperations)
-            .set(eq("auth:test@naver.com"), argThat(s -> s.length() == 6),
-                eq(Duration.ofMinutes(5)));
-        doNothing().when(valueOperations)
-            .set("isAuth:test@naver.com", "false", Duration.ofMinutes(5));
-
-        memberService.sendAuthNum("test@naver.com");
-
-        verify(valueOperations, times(1)).set(eq("auth:test@naver.com"),
-            argThat(s -> s.length() == 6), eq(Duration.ofMinutes(5)));
-        verify(valueOperations, times(1)).set("isAuth:test@naver.com", "false",
-            Duration.ofMinutes(5));
-        verify(mailService, times(1)).sendEmail(eq("test@naver.com"), argThat(s -> s.length() == 6),
-            eq(
-                MailType.AUTH));
-    }
-
-    @Test
-    @DisplayName("인증번호 확인 서비스")
-    void checkAuthNum() {
-        MemberAuthDto.Request request = MemberAuthDto.Request.builder()
-            .authNum("123456")
-            .userEmail("test@naver.com")
-            .build();
-
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("auth:test@naver.com")).thenReturn("123456");
-
-        memberService.checkAuthNum(request);
-
-        verify(valueOperations, times(1)).set("isAuth:test@naver.com", "true");
-    }
-
-    @Test
-    @DisplayName("인증번호 확인 서비스 실패 - 인증 번호 입력 시간 초과")
-    void checkAuthNumFail1() {
-        MemberAuthDto.Request request = MemberAuthDto.Request.builder()
-            .userEmail("test@naver.com")
-            .build();
-
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("auth:test@naver.com")).thenReturn(null);
-
-        assertThrows(MemberException.class, () -> memberService.checkAuthNum(request),
-            MemberErrorCode.TIME_OVER_AUTH.getMessage());
-    }
-
-    @Test
-    @DisplayName("인증번호 확인 서비스 실패 - 인증 번호 불일치")
-    void checkAuthNumFail2() {
-        MemberAuthDto.Request request = MemberAuthDto.Request.builder()
-            .userEmail("test@naver.com")
-            .authNum("234567")
-            .build();
-
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("auth:test@naver.com")).thenReturn("123455");
-
-        assertThrows(MemberException.class, () -> memberService.checkAuthNum(request),
-            MemberErrorCode.WRONG_AUTH_NUM.getMessage());
+                MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
     @Test
     @DisplayName("회원가입 서비스")
     void signup() {
         MemberSignupDto.Request request = MemberSignupDto.Request.builder()
-            .userId("test")
-            .userPw("pw")
-            .userEmail("test@naver.com")
-            .confirmPw("pw")
-            .build();
+                .userId("test")
+                .userPw("pw")
+                .userEmail("test@naver.com")
+                .confirmPw("pw")
+                .build();
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .userPw("pw")
-            .role(Role.ROLE_USER)
-            .userId("test")
-            .build();
+                .userEmail("test@naver.com")
+                .userPw("pw")
+                .role(Role.ROLE_USER)
+                .userId("test")
+                .build();
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("isAuth:test@naver.com")).thenReturn("true");
+        when(redisService.getIsAuthFromRedis("test@naver.com")).thenReturn("true");
         when(passwordEncoder.encode("pw")).thenReturn("pw");
         when(memberRepository.save(argThat(m -> m.getUserId().equals("test")))).thenReturn(member);
 
@@ -330,50 +284,50 @@ class MemberServiceTest {
         assertThat(result.getRole()).isEqualTo(Role.ROLE_USER);
         assertThat(result.getUserPw()).isEqualTo("pw");
         assertThat(result.getUserEmail()).isEqualTo("test@naver.com");
+
+        verify(redisService, times(1)).deleteIsAuthFromRedis("test@naver.com");
     }
 
     @Test
     @DisplayName("회원가입 서비스 실패 - 인증번호 불일치")
     void signupFail1() {
         Request request = Request.builder()
-            .userEmail("test@naver.com")
-            .build();
+                .userEmail("test@naver.com")
+                .build();
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("isAuth:test@naver.com")).thenReturn(null);
+        when(redisService.getIsAuthFromRedis("test@naver.com")).thenReturn("false");
 
         assertThrows(MemberException.class, () -> memberService.signup(request),
-            MemberErrorCode.NOT_COMPLETED_AUTH.getMessage());
+                MemberErrorCode.NOT_COMPLETED_AUTH.getMessage());
     }
 
     @Test
     @DisplayName("회원가입 서비스 실패 - 비밀번호 확인 불일치")
     void signupFail2() {
         Request request = Request.builder()
-            .userEmail("test@naver.com")
-            .userPw("pw")
-            .confirmPw("pa")
-            .build();
+                .userEmail("test@naver.com")
+                .userPw("pw")
+                .confirmPw("pa")
+                .build();
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("isAuth:test@naver.com")).thenReturn("true");
+        when(redisService.getIsAuthFromRedis("test@naver.com")).thenReturn("true");
 
         assertThrows(MemberException.class, () -> memberService.signup(request),
-            MemberErrorCode.DIFF_PW_AND_CONFIRM.getMessage());
+                MemberErrorCode.DIFF_PW_AND_CONFIRM.getMessage());
     }
 
     @Test
     @DisplayName("일반 로그인 서비스")
     void signIn() {
         MemberSignInDto.Request request = MemberSignInDto.Request.builder()
-            .userId("test")
-            .userPw("pw")
-            .build();
+                .userId("test")
+                .userPw("pw")
+                .build();
         Member member = Member.builder()
-            .userPw("pw")
-            .userId("test")
-            .role(Role.ROLE_USER)
-            .build();
+                .userPw("pw")
+                .userId("test")
+                .role(Role.ROLE_USER)
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
         when(passwordEncoder.matches("pw", "pw")).thenReturn(true);
@@ -388,179 +342,177 @@ class MemberServiceTest {
     @DisplayName("일반 로그인 서비스 실패 - 존재하지 않는 회원")
     void signInFail1() {
         MemberSignInDto.Request request = MemberSignInDto.Request.builder()
-            .userId("test")
-            .build();
+                .userId("test")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class,
-            () -> memberService.signIn(request, mockHttpServletResponse),
-            MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+                () -> memberService.signIn(request, mockHttpServletResponse),
+                MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
     @Test
     @DisplayName("일반 로그인 서비스 실패 - 비밀번호 불일치")
     void signInFail2() {
         MemberSignInDto.Request request = MemberSignInDto.Request.builder()
-            .userId("test")
-            .userPw("pw")
-            .build();
+                .userId("test")
+                .userPw("pw")
+                .build();
         Member member = Member.builder()
-            .userPw("pa")
-            .build();
+                .userPw("pa")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
         when(passwordEncoder.matches("pw", "pa")).thenReturn(false);
 
         assertThrows(MemberException.class,
-            () -> memberService.signIn(request, mockHttpServletResponse),
-            MemberErrorCode.WRONG_PASSWORD.getMessage());
+                () -> memberService.signIn(request, mockHttpServletResponse),
+                MemberErrorCode.WRONG_PASSWORD.getMessage());
     }
 
     @Test
     @DisplayName("회원 로그아웃 서비스")
     void signOut() {
-        memberService.signOut(mockHttpServletRequest, mockHttpServletResponse);
+        memberService.signOut("test", mockHttpServletRequest, mockHttpServletResponse);
 
-        verify(tokenProvider, times(1)).logout(mockHttpServletRequest, mockHttpServletResponse);
+        verify(tokenProvider, times(1)).logout("test", mockHttpServletRequest, mockHttpServletResponse);
     }
 
     @Test
     @DisplayName("회원 이메일 변경 서비스")
     void modifyEmail() {
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
-            .originEmail("test@naver.com")
-            .newEmail("test@gmail.com")
-            .build();
+                .originEmail("test@naver.com")
+                .newEmail("test@gmail.com")
+                .build();
         Member member = Member.builder()
-            .userPw("pw")
-            .role(Role.ROLE_USER)
-            .userId("test")
-            .userEmail("test@naver.com")
-            .build();
+                .userPw("pw")
+                .role(Role.ROLE_USER)
+                .userId("test")
+                .userEmail("test@naver.com")
+                .build();
 
         when(memberRepository.findByUserEmail("test@naver.com")).thenReturn(Optional.of(member));
         when(memberRepository.existsByUserEmail("test@gmail.com")).thenReturn(false);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("isAuth:test@gmail.com")).thenReturn("true");
+        when(redisService.getIsAuthFromRedis("test@naver.com")).thenReturn("true");
         when(memberRepository.save(
-            argThat(m -> m.getUserEmail().equals("test@gmail.com")))).thenReturn(
-            member.toBuilder().userEmail("test@gmail.com").build());
+                argThat(m -> m.getUserEmail().equals("test@gmail.com")))).thenReturn(
+                member.toBuilder().userEmail("test@gmail.com").build());
 
         Member result = memberService.modifyEmail(request);
 
         assertThat(result.getUserEmail()).isEqualTo("test@gmail.com");
 
-        verify(redisTemplate, times(1)).delete("isAuth:test@gmail.com");
+        verify(redisService, times(1)).deleteIsAuthFromRedis("test@gmail.com");
     }
 
     @Test
     @DisplayName("회원 이메일 변경 서비스 실패 - 존재하지 않는 회원")
     void modifyEmailFail1() {
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
-            .originEmail("test@naver.com")
-            .build();
+                .originEmail("test@naver.com")
+                .build();
 
         when(memberRepository.findByUserEmail("test@naver.com")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class, () -> memberService.modifyEmail(request),
-            MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+                MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
     @Test
     @DisplayName("회원 이메일 변경 서비스 실패 - 변경할 이메일과 원래 이메일 일치")
     void modifyEmailFail2() {
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
-            .originEmail("test@naver.com")
-            .newEmail("test@naver.com")
-            .build();
+                .originEmail("test@naver.com")
+                .newEmail("test@naver.com")
+                .build();
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .build();
+                .userEmail("test@naver.com")
+                .build();
 
         when(memberRepository.findByUserEmail(request.getOriginEmail())).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
 
         assertThrows(MemberException.class, () -> memberService.modifyEmail(request),
-            MemberErrorCode.ORIGIN_EQUALS_NEW_OF_EMAIL.getMessage());
+                MemberErrorCode.ORIGIN_EQUALS_NEW_OF_EMAIL.getMessage());
     }
 
     @Test
     @DisplayName("회원 이메일 변경 서비스 실패 - 변경할 이메일이 이미 사용중인 이메일")
     void modifyEmailFail3() {
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
-            .originEmail("test@naver.com")
-            .newEmail("test@gmail.com")
-            .build();
+                .originEmail("test@naver.com")
+                .newEmail("test@gmail.com")
+                .build();
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .build();
+                .userEmail("test@naver.com")
+                .build();
 
         when(memberRepository.findByUserEmail(request.getOriginEmail())).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
         when(memberRepository.existsByUserEmail(request.getNewEmail())).thenReturn(true);
 
         assertThrows(MemberException.class, () -> memberService.modifyEmail(request),
-            MemberErrorCode.DUPLICATED_EMAIL.getMessage());
+                MemberErrorCode.DUPLICATED_EMAIL.getMessage());
     }
 
     @Test
     @DisplayName("회원 이메일 변경 서비스 실패 - 변경할 이메일로 인증 진행을 하지 않은 경우")
     void modifyEmailFail4() {
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
-            .originEmail("test@naver.com")
-            .newEmail("test@gmail.com")
-            .build();
+                .originEmail("test@naver.com")
+                .newEmail("test@gmail.com")
+                .build();
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .build();
+                .userEmail("test@naver.com")
+                .build();
 
         when(memberRepository.findByUserEmail(request.getOriginEmail())).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
         when(memberRepository.existsByUserEmail(request.getNewEmail())).thenReturn(false);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("isAuth:test@gmail.com")).thenReturn(null);
+        when(redisService.getIsAuthFromRedis("test@gmail.com")).thenReturn("false");
 
         assertThrows(MemberException.class, () -> memberService.modifyEmail(request),
-            MemberErrorCode.NOT_COMPLETED_AUTH.getMessage());
+                MemberErrorCode.NOT_COMPLETED_AUTH.getMessage());
     }
 
     @Test
     @DisplayName("회원 이메일 변경 서비스 실패 - 카카오 회원인 경우")
     void modifyEmailFail5() {
         Member member = Member.builder()
-            .userEmail("test@naver.com")
-            .oAuthProvider(OAuthProvider.KAKAO)
-            .build();
+                .userEmail("test@naver.com")
+                .oAuthProvider(OAuthProvider.KAKAO)
+                .build();
         MemberModifyEmailDto.Request request = MemberModifyEmailDto.Request.builder()
-            .newEmail("test@gmail.com")
-            .originEmail("test@naver.com")
-            .build();
+                .newEmail("test@gmail.com")
+                .originEmail("test@naver.com")
+                .build();
 
         when(memberRepository.findByUserEmail(member.getUserEmail())).thenReturn(
-            Optional.of(member));
+                Optional.of(member));
 
         assertThrows(MemberException.class, () -> memberService.modifyEmail(request),
-            MemberErrorCode.SOCIAL_USER.getMessage());
+                MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
     @DisplayName("회원 비밀번호 변경 서비스")
     void modifyPw() {
         MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
-            .newPw("pa")
-            .confirmPw("pa")
-            .originPw("pw")
-            .build();
+                .newPw("pa")
+                .confirmPw("pa")
+                .originPw("pw")
+                .build();
         Member member = Member.builder()
-            .userPw("pw")
-            .build();
+                .userPw("pw")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(request.getOriginPw(), member.getUserPw())).thenReturn(true);
         when(passwordEncoder.encode(request.getNewPw())).thenReturn("pa");
         when(memberRepository.save(argThat(m -> m.getUserPw().equals("pa")))).thenReturn(
-            member.toBuilder().userPw("pa").build());
+                member.toBuilder().userPw("pa").build());
 
         Member result = memberService.modifyPw("test", request);
 
@@ -571,87 +523,87 @@ class MemberServiceTest {
     @DisplayName("회원 비밀번호 변경 서비스 실패 - 존재하지 않는 회원")
     void modifyPwFail1() {
         MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
-            .build();
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class, () -> memberService.modifyPw("test", request),
-            MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+                MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
     @Test
     @DisplayName("회원 비밀번호 변경 서비스 실패 - 기존의 비밀번호 불일치")
     void modifyPwFail2() {
         MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
-            .originPw("pa")
-            .build();
+                .originPw("pa")
+                .build();
         Member member = Member.builder()
-            .userPw("pw")
-            .build();
+                .userPw("pw")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(request.getOriginPw(), member.getUserPw())).thenReturn(false);
 
         assertThrows(MemberException.class, () -> memberService.modifyPw("test", request),
-            MemberErrorCode.WRONG_ORIGIN_PW.getMessage());
+                MemberErrorCode.WRONG_ORIGIN_PW.getMessage());
     }
 
     @Test
     @DisplayName("회원 비밀번호 변경 서비스 실패 - 새로운 비밀번호 확인 입력 불일치")
     void modifyPwFail3() {
         MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
-            .originPw("pw")
-            .newPw("pa")
-            .confirmPw("pw")
-            .build();
+                .originPw("pw")
+                .newPw("pa")
+                .confirmPw("pw")
+                .build();
         Member member = Member.builder()
-            .userPw("pw")
-            .build();
+                .userPw("pw")
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(request.getOriginPw(), member.getUserPw())).thenReturn(true);
 
         assertThrows(MemberException.class, () -> memberService.modifyPw("test", request),
-            MemberErrorCode.DIFF_PW_AND_CONFIRM.getMessage());
+                MemberErrorCode.DIFF_PW_AND_CONFIRM.getMessage());
     }
 
     @Test
     @DisplayName("회원 비밀번호 변경 서비스 실패 - 카카오 회원인 경우")
     void modifyPwFail4() {
         Member member = Member.builder()
-            .userId("test")
-            .oAuthProvider(OAuthProvider.KAKAO)
-            .build();
+                .userId("test")
+                .oAuthProvider(OAuthProvider.KAKAO)
+                .build();
         MemberModifyPwDto.Request request = MemberModifyPwDto.Request.builder()
-            .newPw("pa")
-            .originPw("pw")
-            .confirmPw("pa")
-            .build();
+                .newPw("pa")
+                .originPw("pw")
+                .confirmPw("pa")
+                .build();
 
         when(memberRepository.findByUserId(member.getUserId())).thenReturn(Optional.of(member));
 
         assertThrows(MemberException.class,
-            () -> memberService.modifyPw(member.getUserId(), request),
-            MemberErrorCode.SOCIAL_USER.getMessage());
+                () -> memberService.modifyPw(member.getUserId(), request),
+                MemberErrorCode.SOCIAL_USER.getMessage());
     }
 
     @Test
     @DisplayName("회원탈퇴 서비스")
     void deleteMember() {
         Member member = Member.builder()
-            .build();
+                .build();
 
         when(memberRepository.findByUserId("test")).thenReturn(Optional.of(member));
-        when(memberRepository.save(argThat(m -> m.getDelDate() != null))).thenReturn(
-            member.toBuilder().delDate(
-                LocalDateTime.now()).build());
+        when(memberRepository.save(argThat(m -> m.getDeletedAt() != null))).thenReturn(
+                member.toBuilder().deletedAt(
+                        LocalDateTime.now()).build());
 
         Member result = memberService.deleteMember("test", mockHttpServletRequest,
-            mockHttpServletResponse);
+                mockHttpServletResponse);
 
-        assertThat(result.getDelDate()).isNotNull();
+        assertThat(result.getDeletedAt()).isNotNull();
 
-        verify(tokenProvider, times(1)).logout(mockHttpServletRequest, mockHttpServletResponse);
+        verify(tokenProvider, times(1)).logout("test", mockHttpServletRequest, mockHttpServletResponse);
     }
 
     @Test
@@ -660,7 +612,22 @@ class MemberServiceTest {
         when(memberRepository.findByUserId("test")).thenReturn(Optional.empty());
 
         assertThrows(MemberException.class,
-            () -> memberService.deleteMember("test", mockHttpServletRequest,
-                mockHttpServletResponse), MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+                () -> memberService.deleteMember("test", mockHttpServletRequest,
+                        mockHttpServletResponse), MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
+    }
+
+    @Test
+    @DisplayName("회원탈퇴 서비스 실패 - 이미 탈퇴한 경우")
+    void deleteMemberFail2() {
+        Member member = Member.builder()
+                .userId("test")
+                .deletedAt(LocalDateTime.now())
+                .build();
+
+        when(memberRepository.findByUserId(member.getUserId())).thenReturn(Optional.of(member));
+
+        assertThrows(MemberException.class,
+                () -> memberService.deleteMember(member.getUserId(), mockHttpServletRequest,
+                        mockHttpServletResponse), MemberErrorCode.ALREADY_DELETED.getMessage());
     }
 }
