@@ -78,15 +78,6 @@ public class ImageService {
         return createFileEntity(fileList);
     }
 
-    /**
-     * r2에 저장된 파일 제거 서비스
-     *
-     * @param storeFileName 제거할 파일의 r2에 저장된 파일명
-     */
-    public void deleteFile(String storeFileName) {
-        r2Client.deleteObject(bucketName, storeFileName);
-    }
-
     // r2에 파일을 저장하는 메소드
     private void uploadFile(String storeFileName, MultipartFile file) throws IOException {
         ObjectMetadata objectMetadata = new ObjectMetadata();
