@@ -4,12 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.exception.ReadImageException;
 import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.model.PosterType;
-import com.hwansol.moviego.image.repository.ImageRepository;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,9 +17,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -29,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class ImageService {
 
-    private final ImageRepository imageRepository;
     private final AmazonS3 r2Client;
 
     @Value("${r2.bucketName}")
@@ -38,35 +33,34 @@ public class ImageService {
     /**
      * 파일 조회 서비스
      *
-     * @param id 조회할 파일 pk
-     * @return 조회된 파일 엔티티
+     * @param imageList 조회할 이미지 리스트
+     * @return 이미지 조회 dto
      */
-    @Transactional(readOnly = true)
-    @Cacheable(value = "image", key = "#id")
-    public ImageGetDto.Response getFile(Long id) {
-        Image image = imageRepository.findById(id)
-                .orElseThrow(NotFoundException::new);
+    public List<ImageGetDto.Response> getImageList(List<Image> imageList) {
+        return imageList.stream()
+                .map(i -> {
+                    S3Object object = r2Client.getObject(bucketName, i.getStoreImageName());
 
-        S3Object object = r2Client.getObject(bucketName, image.getStoreImageName());
+                    byte[] imageData;
+                    try (S3ObjectInputStream inputStream = object.getObjectContent();
+                         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
-        byte[] imageData;
-        try (S3ObjectInputStream inputStream = object.getObjectContent();
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                        byte[] buffer = new byte[1024];
+                        int read;
+                        while ((read = inputStream.read(buffer)) != -1) {
+                            baos.write(buffer, 0, read);
+                        }
 
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = inputStream.read(buffer)) != -1) {
-                baos.write(buffer, 0, read);
-            }
+                        imageData = baos.toByteArray();
+                    } catch (IOException e) {
+                        throw new ReadImageException();
+                    }
 
-            imageData = baos.toByteArray();
-        } catch (IOException e) {
-            throw new ReadImageException();
-        }
+                    String contentType = "image/webp";
 
-        String contentType = "image/webp";
-
-        return ImageGetDto.Response.from(image, contentType, imageData);
+                    return ImageGetDto.Response.from(i, contentType, imageData);
+                })
+                .toList();
     }
 
     /**
@@ -75,7 +69,6 @@ public class ImageService {
      * @param fileList 생성할 파일 리스트
      * @return 생성된 파일 엔티티 리스트
      */
-    @Transactional
     public List<Image> createFile(List<MultipartFile> fileList) {
         return createFileEntity(fileList);
     }
