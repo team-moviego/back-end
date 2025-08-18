@@ -38,9 +38,6 @@ public class Image extends BaseTImeEntity {
     @Column(nullable = false)
     private String extension; // 파일 확장자
 
-    @Column(length = 3000, nullable = false)
-    private String url;
-
     @Column
     private long size; // byte
 
@@ -56,8 +53,8 @@ public class Image extends BaseTImeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Image(String originImageName, String storeImageName, String extension, String url, long size, PosterType posterType, Movie movie, LocalDateTime deletedAt) {
-        boolean isValidateDataFail = originImageName == null || originImageName.isBlank() || storeImageName == null || storeImageName.isBlank() || url == null || url.isBlank() || size <= 0 || posterType == null;
+    public Image(String originImageName, String storeImageName, String extension, long size, PosterType posterType, Movie movie, LocalDateTime deletedAt) {
+        boolean isValidateDataFail = originImageName == null || originImageName.isBlank() || storeImageName == null || storeImageName.isBlank() || size <= 0 || posterType == null;
 
         if (isValidateDataFail) {
             throw new IllegalArgumentException("Image 생성 실패");
@@ -66,7 +63,6 @@ public class Image extends BaseTImeEntity {
         this.originImageName = originImageName;
         this.storeImageName = storeImageName;
         this.extension = extension;
-        this.url = url;
         this.size = size;
         this.posterType = posterType;
         this.movie = movie;
