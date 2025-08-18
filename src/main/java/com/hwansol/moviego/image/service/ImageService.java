@@ -8,9 +8,11 @@ import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.exception.ReadImageException;
 import com.hwansol.moviego.image.model.Image;
+import com.hwansol.moviego.image.model.PosterType;
 import com.hwansol.moviego.image.repository.ImageRepository;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -88,37 +90,51 @@ public class ImageService {
 
     // 파일 엔티티 생성하는 메소드
     private List<Image> createFileEntity(List<MultipartFile> fileList) {
-        // 확장자
-        // 중복된 파일 이름을 피하기 위해
+        List<Image> imageList = new ArrayList<>();
 
-        return fileList.stream()
-                .map(f -> {
-                    String originalFilename = f.getOriginalFilename();
+        for (int i = 0; i < fileList.size(); i++) {
+            MultipartFile multipartFile = fileList.get(i);
 
-                    String extension = ""; // 확장자
-                    int dotIndex = Objects.requireNonNull(originalFilename).lastIndexOf('.');
-                    if (dotIndex > 0 && dotIndex < originalFilename.length() - 1) {
-                        extension = originalFilename.substring(dotIndex + 1);
-                    }
+            String originalFilename = multipartFile.getOriginalFilename();
 
-                    String storeFileName = UUID.randomUUID() + originalFilename; // 중복된 파일 이름을 피하기 위해
+            String extension = ""; // 확장자
+            int dotIndex = Objects.requireNonNull(originalFilename).lastIndexOf('.');
+            if (dotIndex > 0 && dotIndex < originalFilename.length() - 1) {
+                extension = originalFilename.substring(dotIndex + 1);
+            }
 
-                    try {
-                        uploadFile(storeFileName, f);
-                    } catch (IOException e) {
-                        log.error("{} 파일을 r2에 저장하는데 실패하였습니다.", originalFilename, e);
-                        throw new RuntimeException(e);
-                    }
+            String storeFileName = UUID.randomUUID() + originalFilename; // 중복된 파일 이름을 피하기 위해
 
-                    long size = f.getSize();
+            try {
+                uploadFile(storeFileName, multipartFile);
+            } catch (IOException e) {
+                log.error("{} 파일을 r2에 저장하는데 실패하였습니다.", originalFilename, e);
+                throw new RuntimeException(e);
+            }
 
-                    return Image.builder()
-                            .originImageName(originalFilename)
-                            .storeImageName(storeFileName)
-                            .extension(extension)
-                            .size(size)
-                            .build();
-                })
-                .toList();
+            long size = multipartFile.getSize();
+
+            Image image = Image.builder()
+                    .originImageName(originalFilename)
+                    .storeImageName(storeFileName)
+                    .extension(extension)
+                    .size(size)
+                    .posterType(PosterType.NORMAL)
+                    .build();
+
+            if (i == 0) {
+                image = Image.builder()
+                        .originImageName(originalFilename)
+                        .storeImageName(storeFileName)
+                        .extension(extension)
+                        .size(size)
+                        .posterType(PosterType.MAIN)
+                        .build();
+            }
+
+            imageList.add(image);
+        }
+
+        return imageList;
     }
 }
