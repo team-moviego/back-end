@@ -89,8 +89,6 @@ spring:
       max-file-size: 5MB
       max-request-size: 5MB
 
-imgUrl: ${IMAGE_URL}
-
 r2:
   bucketName: ${R2_BUCKET_NAME}
   endpointUrl: ${R2_ENDPOINT_URL}
