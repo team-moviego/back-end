@@ -4,7 +4,6 @@ import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.movie.model.Movie;
 import com.hwansol.moviego.movie.model.MovieRating;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -54,7 +53,7 @@ public class MovieGetDto {
             this.reservationRate = reservationRate;
         }
 
-        public static Response from(Movie movie) {
+        public static Response from(Movie movie, List<ImageGetDto.Response> imageList) {
             List<String> actorNames = movie.getActors().stream()
                     .map(ma -> ma.getActor().getName())
                     .toList();
@@ -64,14 +63,11 @@ public class MovieGetDto {
             List<String> genreNames = movie.getGenres().stream()
                     .map(mg -> mg.getGenre().getName())
                     .toList();
-            List<ImageGetDto.Response> images = movie.getImages() == null || movie.getImages().isEmpty() ? new ArrayList<>() : movie.getImages().stream()
-                    .map(ImageGetDto.Response::from)
-                    .toList();
 
             return Response.builder()
                     .actors(actorNames)
                     .genres(genreNames)
-                    .images(images)
+                    .images(imageList)
                     .rating(movie.getRating())
                     .id(movie.getId())
                     .description(movie.getDescription())
