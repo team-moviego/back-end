@@ -43,6 +43,7 @@ public class SecurityConfig {
                 "/api/members/member/email/{userEmail}",
                 "/api/members/member/id",
                 "/api/members/member/pw",
+                "/api/genres",
                 "/api/movies/movie/{id}",
                 "/api/movies"
         });
