@@ -45,10 +45,10 @@ public class TokenProvider {
     @Value("${spring.jwt.secret}")
     private String secret;
 
-    @Value("${spring.jwt.access.expire")
+    @Value("${spring.jwt.access.expire}")
     private long accessTokenExpire;
 
-    @Value("${spring.jwt.refresh.expire")
+    @Value("${spring.jwt.refresh.expire}")
     private long refreshTokenExpire;
 
     /**
@@ -104,7 +104,7 @@ public class TokenProvider {
         UserDetails userDetails = memberDetailsService.loadUserByUsername(getMemberId(jwt));
 
         return new UsernamePasswordAuthenticationToken(userDetails, "",
-                                                       userDetails.getAuthorities());
+                userDetails.getAuthorities());
     }
 
     /**
