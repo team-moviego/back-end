@@ -1,0 +1,69 @@
+package com.hwansol.moviego.seat.model;
+
+import com.hwansol.moviego.config.BaseTImeEntity;
+import com.hwansol.moviego.screen.model.Screen;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted_at IS NULL")
+public class Seat extends BaseTImeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column
+    private int seatNum;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SeatType seatType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "screen_id", nullable = false)
+    private Screen screen;
+
+    @Column
+    private LocalDateTime deletedAt;
+
+    @Builder
+    public Seat(int seatNum, SeatType seatType, Screen screen, LocalDateTime deletedAt) {
+        if (seatNum <= 0 || seatType == null) {
+            throw new IllegalArgumentException("Seat 엔티티 생성 실패");
+        }
+
+        this.seatNum = seatNum;
+        this.seatType = seatType;
+        this.screen = screen;
+        this.deletedAt = deletedAt;
+    }
+
+    public void relatedScreen(Screen screen) {
+        if (this.screen != null) {
+            throw new IllegalStateException("이미 연결된 상태입니다.");
+        }
+
+        if (screen == null) {
+            throw new IllegalArgumentException("연관관계 연결 실패");
+        }
+
+        this.screen = screen;
+    }
+}
