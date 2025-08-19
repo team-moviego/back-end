@@ -22,7 +22,7 @@ public class RedisService {
     @Value("${spring.jwt.refresh.expire}")
     private long refreshTokenExpire;
 
-    @Value("${spring.mail.auth-code-expiration-millis")
+    @Value("${spring.mail.auth-code-expiration-millis}")
     private long authExpire;
 
     /**
