@@ -3,6 +3,7 @@ package com.hwansol.moviego.movie.dto;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.movie.model.Movie;
 import com.hwansol.moviego.movie.model.MovieRating;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
@@ -15,7 +16,7 @@ public class MovieGetDto {
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @Builder(toBuilder = true)
-    public static class Response {
+    public static class Response implements Serializable {
 
         private Long id;
         private String titleKo;
