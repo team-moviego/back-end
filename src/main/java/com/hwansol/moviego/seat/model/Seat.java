@@ -1,6 +1,7 @@
 package com.hwansol.moviego.seat.model;
 
 import com.hwansol.moviego.config.BaseTImeEntity;
+import com.hwansol.moviego.movieschedule.model.SeatStatus;
 import com.hwansol.moviego.screen.model.Screen;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +35,7 @@ public class Seat extends BaseTImeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SeatType seatType;
+    private SeatStatus seatStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "screen_id", nullable = false)
@@ -44,13 +45,13 @@ public class Seat extends BaseTImeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Seat(int seatNum, SeatType seatType, Screen screen, LocalDateTime deletedAt) {
-        if (seatNum <= 0 || seatType == null) {
+    public Seat(int seatNum, SeatStatus seatStatus, Screen screen, LocalDateTime deletedAt) {
+        if (seatNum <= 0 || seatStatus == null) {
             throw new IllegalArgumentException("Seat 엔티티 생성 실패");
         }
 
         this.seatNum = seatNum;
-        this.seatType = seatType;
+        this.seatStatus = seatStatus;
         this.screen = screen;
         this.deletedAt = deletedAt;
     }

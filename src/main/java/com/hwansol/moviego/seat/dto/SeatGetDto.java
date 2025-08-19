@@ -1,7 +1,7 @@
 package com.hwansol.moviego.seat.dto;
 
+import com.hwansol.moviego.movieschedule.model.SeatStatus;
 import com.hwansol.moviego.seat.model.Seat;
-import com.hwansol.moviego.seat.model.SeatType;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,10 +16,10 @@ public class SeatGetDto {
 
         private Long id;
         private int seatNum;
-        private SeatType seatType;
+        private SeatStatus seatStatus;
 
-        public Response(Long id, int seatNum, SeatType seatType) {
-            boolean isValidateDataFail = id == null || id <= 0 || seatNum <= 0 || seatType == null;
+        public Response(Long id, int seatNum, SeatStatus seatStatus) {
+            boolean isValidateDataFail = id == null || id <= 0 || seatNum <= 0 || seatStatus == null;
 
             if (isValidateDataFail) {
                 throw new IllegalArgumentException("SeatGetDto.Response 생성 실패");
@@ -27,14 +27,14 @@ public class SeatGetDto {
 
             this.id = id;
             this.seatNum = seatNum;
-            this.seatType = seatType;
+            this.seatStatus = seatStatus;
         }
 
         public static SeatGetDto.Response from(Seat seat) {
             return SeatGetDto.Response.builder()
                     .id(seat.getId())
                     .seatNum(seat.getSeatNum())
-                    .seatType(seat.getSeatType())
+                    .seatStatus(seat.getSeatStatus())
                     .build();
         }
     }
