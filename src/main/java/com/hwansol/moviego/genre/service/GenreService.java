@@ -1,6 +1,8 @@
 package com.hwansol.moviego.genre.service;
 
+import com.hwansol.moviego.common.DuplicatedException;
 import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.model.Genre;
 import com.hwansol.moviego.genre.repository.GenreRepository;
 import java.util.List;
@@ -24,6 +26,26 @@ public class GenreService {
     @Transactional(readOnly = true)
     public List<Genre> getGenreList() {
         return genreRepository.findAll();
+    }
+
+    /**
+     * 장르 생성
+     *
+     * @param request GenreCreateDto.Request
+     * @return 생성된 장르 엔티티
+     */
+    @Transactional
+    public Genre createGenre(GenreCreateDto.Request request) {
+        Genre genre = genreRepository.findByName(request.getName())
+                .orElse(null);
+
+        if (genre != null) {
+            throw new DuplicatedException();
+        }
+
+        Genre newGenre = request.toEntity();
+
+        return genreRepository.save(newGenre);
     }
 
     /**
