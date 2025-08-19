@@ -28,6 +28,14 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    private ResponseEntity<String> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        log.error("403 Forbidden");
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("해당 요청에 대한 권한이 없습니다.");
+    }
+
     // 404에러 핸들러
     @ExceptionHandler(NoHandlerFoundException.class)
     private ResponseEntity<String> handleNotFoundException(NoHandlerFoundException e) {
