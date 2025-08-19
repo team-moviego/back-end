@@ -46,4 +46,12 @@ public class Genre extends BaseTImeEntity {
         this.movieGenres = movieGenres;
         this.deletedAt = deletedAt;
     }
+
+    public void withId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Genre 엔티티 생성 실패");
+        }
+
+        this.id = id;
+    }
 }
