@@ -100,7 +100,7 @@ public class Movie extends BaseTImeEntity {
 
         this.genres = this.genres == null ? new ArrayList<>() : this.genres;
 
-        if (this.genres.stream().anyMatch(g -> movieGenre.getId() != null && g.getId().equals(movieGenre.getId()))) {
+        if (this.genres.stream().anyMatch(g -> g.getGenre().getName().equals(movieGenre.getGenre().getName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
@@ -115,7 +115,7 @@ public class Movie extends BaseTImeEntity {
 
         this.actors = this.actors == null ? new ArrayList<>() : this.actors;
 
-        if (this.actors.stream().anyMatch(a -> movieActor.getId() != null && a.getId().equals(movieActor.getId()))) {
+        if (this.actors.stream().anyMatch(a -> a.getActor().getName().equals(movieActor.getActor().getName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
@@ -130,7 +130,7 @@ public class Movie extends BaseTImeEntity {
 
         this.directors = this.directors == null ? new ArrayList<>() : this.directors;
 
-        if (this.directors.stream().anyMatch(d -> movieDirector.getId() != null && d.getId().equals(movieDirector.getId()))) {
+        if (this.directors.stream().anyMatch(d -> d.getDirector().getName().equals(movieDirector.getDirector().getName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
@@ -145,7 +145,7 @@ public class Movie extends BaseTImeEntity {
 
         this.images = this.images == null ? new ArrayList<>() : this.images;
 
-        if (this.images.stream().anyMatch(f -> image.getId() != null && f.getId().equals(image.getId()))) {
+        if (this.images.stream().anyMatch(f -> f.getStoreImageName().equals(image.getStoreImageName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
