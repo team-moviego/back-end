@@ -1,4 +1,4 @@
-package com.hwansol.moviego.movie.model;
+package com.hwansol.moviego.actor.model;
 
 import com.hwansol.moviego.config.BaseTImeEntity;
 import jakarta.persistence.Column;
@@ -17,7 +17,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at IS NULL")
-public class Director extends BaseTImeEntity {
+public class Actor extends BaseTImeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +30,9 @@ public class Director extends BaseTImeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Director(String name, LocalDateTime deletedAt) {
+    public Actor(String name, LocalDateTime deletedAt) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Director 엔티티 생성 실패");
+            throw new IllegalArgumentException("Actor 엔티티 생성 실패");
         }
 
         this.name = name;

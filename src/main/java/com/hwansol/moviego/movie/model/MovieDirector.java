@@ -1,6 +1,7 @@
 package com.hwansol.moviego.movie.model;
 
 import com.hwansol.moviego.config.BaseTImeEntity;
+import com.hwansol.moviego.director.model.Director;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
