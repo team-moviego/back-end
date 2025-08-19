@@ -51,7 +51,9 @@ public class SecurityConfig {
         ALLOWED_URLS.put(HttpMethod.POST, new String[]{
                 "/h2-console/**",
                 "/api/members/member/signup",
-                "/api/members/member/signin"
+                "/api/members/member/signin",
+                "/api/members/member/auth",
+                "/api/members/member/auth-check"
         });
     }
 
