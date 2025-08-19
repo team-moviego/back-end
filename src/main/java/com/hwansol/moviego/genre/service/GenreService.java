@@ -1,5 +1,6 @@
 package com.hwansol.moviego.genre.service;
 
+import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.genre.model.Genre;
 import com.hwansol.moviego.genre.repository.GenreRepository;
 import java.util.List;
@@ -23,5 +24,21 @@ public class GenreService {
     @Transactional(readOnly = true)
     public List<Genre> getGenreList() {
         return genreRepository.findAll();
+    }
+
+    /**
+     * 장르 하드 삭제
+     *
+     * @param genreId 삭제할 장르 pk
+     * @return 삭제된 장르 엔티티
+     */
+    @Transactional
+    public Genre deleteGenre(Long genreId) {
+        Genre genre = genreRepository.findById(genreId)
+                .orElseThrow(NotFoundException::new);
+
+        genreRepository.delete(genre);
+
+        return genre;
     }
 }
