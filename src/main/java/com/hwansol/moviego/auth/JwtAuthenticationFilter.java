@@ -64,8 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Cookie refreshTokenCookie = cookieService.getRefreshTokenCookie(request);
-        String refreshToken = refreshTokenCookie.getValue();
-        if (redisService.getBlackRefreshTokenFromRedis(refreshToken) != null) { // 리프레시 토큰이 블랙리스트인 경우
+        String refreshToken = refreshTokenCookie != null ? refreshTokenCookie.getValue() : null;
+        if (refreshToken != null && redisService.getBlackRefreshTokenFromRedis(refreshToken) != null) { // 리프레시 토큰이 블랙리스트인 경우
             log.error("블랙리스트 토큰으로 요청 시도로 인한 거절 - {}", LocalDateTime.now());
             filterChain.doFilter(request, response);
             return;
