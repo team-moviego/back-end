@@ -27,6 +27,9 @@ public class Seat extends BaseTImeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String seatRow;
+
     @Column
     private int seatNum;
 
@@ -38,8 +41,10 @@ public class Seat extends BaseTImeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Seat(int seatNum, Screen screen, LocalDateTime deletedAt) {
-        if (seatNum <= 0) {
+    public Seat(String seatRow, int seatNum, Screen screen, LocalDateTime deletedAt) {
+        boolean isValidateDataFail = seatNum <= 0 || seatRow == null || seatRow.isBlank();
+
+        if (isValidateDataFail) {
             throw new IllegalArgumentException("Seat 엔티티 생성 실패");
         }
 
