@@ -3,6 +3,7 @@ package com.hwansol.moviego.movieschedule.model;
 import com.hwansol.moviego.config.BaseTImeEntity;
 import com.hwansol.moviego.movie.model.Movie;
 import com.hwansol.moviego.screen.model.Screen;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +12,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,11 +46,14 @@ public class MovieSchedule extends BaseTImeEntity {
     @JoinColumn(name = "screen_id")
     private Screen screen;
 
+    @OneToMany(mappedBy = "movieSchedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MovieScheduleSeat> movieScheduleSeats;
+
     @Column
     private LocalDateTime deletedAt;
 
     @Builder
-    public MovieSchedule(LocalDateTime startDateTime, LocalDateTime endDateTime, Movie movie, Screen screen, LocalDateTime deletedAt) {
+    public MovieSchedule(LocalDateTime startDateTime, LocalDateTime endDateTime, Movie movie, Screen screen, List<MovieScheduleSeat> movieScheduleSeats, LocalDateTime deletedAt) {
         LocalDateTime now = LocalDateTime.now();
         boolean isValidateDataFail = startDateTime == null || startDateTime.isBefore(now) || endDateTime == null || endDateTime.isBefore(startDateTime);
 
@@ -58,6 +65,7 @@ public class MovieSchedule extends BaseTImeEntity {
         this.endDateTime = endDateTime;
         this.movie = movie;
         this.screen = screen;
+        this.movieScheduleSeats = movieScheduleSeats;
         this.deletedAt = deletedAt;
     }
 
@@ -83,5 +91,23 @@ public class MovieSchedule extends BaseTImeEntity {
         }
 
         this.screen = screen;
+    }
+
+    public void addMovieScheduleSeat(MovieScheduleSeat movieScheduleSeat) {
+        if (movieScheduleSeat == null) {
+            throw new IllegalArgumentException("연관관계 추가 실패");
+        }
+
+        this.movieScheduleSeats = this.movieScheduleSeats == null ? new ArrayList<>() : this.movieScheduleSeats;
+
+        boolean isDuplicated = this.movieScheduleSeats.stream()
+                .anyMatch(m -> m.getSeat().getSeatNum() == movieScheduleSeat.getSeat().getSeatNum());
+
+        if (isDuplicated) {
+            throw new IllegalArgumentException("이미 연결된 연관관계 입니다.");
+        }
+
+        this.movieScheduleSeats.add(movieScheduleSeat);
+        movieScheduleSeat.relatedMovieSchedule(this);
     }
 }
