@@ -44,7 +44,7 @@ public class MovieScheduleGetDto {
             this.availableSeat = availableSeat;
         }
 
-        public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule, ImageGetDto.Response image) {
+        public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule, List<ImageGetDto.Response> imageList) {
             List<MovieScheduleSeat> availableSeats = movieSchedule.getMovieScheduleSeats() == null ? new ArrayList<>() :
                     movieSchedule.getMovieScheduleSeats().stream()
                             .filter(s -> s.getSeatStatus().equals(SeatStatus.AVAILABLE))
@@ -52,7 +52,7 @@ public class MovieScheduleGetDto {
 
             return Response.builder()
                     .id(movieSchedule.getId())
-                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), image))
+                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), imageList))
                     .startDateTime(movieSchedule.getStartDateTime())
                     .endDateTime(movieSchedule.getEndDateTime())
                     .screenName(movieSchedule.getScreen().getName())
