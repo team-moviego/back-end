@@ -6,6 +6,7 @@ import com.hwansol.moviego.movieschedule.model.MovieSchedule;
 import com.hwansol.moviego.movieschedule.model.MovieScheduleSeat;
 import com.hwansol.moviego.movieschedule.model.SeatStatus;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -44,9 +45,10 @@ public class MovieScheduleGetDto {
         }
 
         public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule, ImageGetDto.Response image) {
-            List<MovieScheduleSeat> availableSeats = movieSchedule.getMovieScheduleSeats().stream()
-                    .filter(s -> s.getSeatStatus().equals(SeatStatus.AVAILABLE))
-                    .toList();
+            List<MovieScheduleSeat> availableSeats = movieSchedule.getMovieScheduleSeats() == null ? new ArrayList<>() :
+                    movieSchedule.getMovieScheduleSeats().stream()
+                            .filter(s -> s.getSeatStatus().equals(SeatStatus.AVAILABLE))
+                            .toList();
 
             return Response.builder()
                     .id(movieSchedule.getId())
