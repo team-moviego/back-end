@@ -3,7 +3,6 @@ package com.hwansol.moviego.screen.dto;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -35,11 +34,7 @@ public class ScreenGetDto {
             this.movieScheduleList = movieScheduleList;
         }
 
-        public static ScreenGetDto.Response from(Screen screen, List<MovieScheduleGetDto.Response> movieScheduleResponseList) {
-            List<SeatGetDto.Response> seatList = screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
-                    .map(SeatGetDto.Response::from)
-                    .toList();
-
+        public static ScreenGetDto.Response from(Screen screen, List<SeatGetDto.Response> seatList, List<MovieScheduleGetDto.Response> movieScheduleResponseList) {
             return Response.builder()
                     .id(screen.getId())
                     .name(screen.getName())
