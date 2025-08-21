@@ -48,6 +48,7 @@ public class Seat extends BaseTImeEntity {
             throw new IllegalArgumentException("Seat 엔티티 생성 실패");
         }
 
+        this.seatRow = seatRow;
         this.seatNum = seatNum;
         this.screen = screen;
         this.deletedAt = deletedAt;
