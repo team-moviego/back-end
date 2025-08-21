@@ -43,15 +43,15 @@ public class ImageService {
 
                     byte[] imageData;
                     try (S3ObjectInputStream inputStream = object.getObjectContent();
-                         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                         ByteArrayOutputStream imageOutputStream = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[1024];
                         int read;
                         while ((read = inputStream.read(buffer)) != -1) {
-                            baos.write(buffer, 0, read);
+                            imageOutputStream.write(buffer, 0, read);
                         }
 
-                        imageData = baos.toByteArray();
+                        imageData = imageOutputStream.toByteArray();
                     } catch (IOException e) {
                         throw new ReadImageException();
                     }
