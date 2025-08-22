@@ -21,10 +21,11 @@ public class ScreenCreateDto {
         @NotBlank(message = "상영관 이름을 입력해주세요.")
         private String name;
 
+        @Valid
         @NotEmpty(message = "좌석 생성 정보를 입력해주세요.")
-        private List<@Valid SeatCreateDto> seatCreateDtoList;
+        private List<SeatCreateDto.Request> seatCreateDtoList;
 
-        public Request(String name, List<SeatCreateDto> seatCreateDtoList) {
+        public Request(String name, List<SeatCreateDto.Request> seatCreateDtoList) {
             boolean isValidateDataFail = name == null || name.isBlank() || seatCreateDtoList == null || seatCreateDtoList.isEmpty();
 
             if (isValidateDataFail) {
