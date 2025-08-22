@@ -1,13 +1,16 @@
 package com.hwansol.moviego.screen.service;
 
+import com.hwansol.moviego.common.DuplicatedException;
 import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
+import com.hwansol.moviego.screen.dto.ScreenCreateDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
+import com.hwansol.moviego.seat.dto.SeatCreateDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +51,32 @@ public class ScreenService {
         return screenList.stream()
                 .map(this::getScreenGetDtoResponse)
                 .toList();
+    }
+
+    /**
+     * 상영관 생성 서비스
+     *
+     * @param request ScreenCreateDto.Request
+     * @return 생성된 상영관 엔티티
+     */
+    @Transactional
+    public Screen createScreen(ScreenCreateDto.Request request) {
+        Screen screen = screenRepository.findByName(request.getName())
+                .orElse(null);
+
+        if (screen != null) {
+            throw new DuplicatedException();
+        }
+
+        Screen newScreen = request.toEntity();
+
+        List<SeatCreateDto.Request> seatCreateRequestDtoList = request.getSeatCreateDtoList();
+
+        seatCreateRequestDtoList.stream()
+                .map(SeatCreateDto.Request::toEntity)
+                .forEach(newScreen::addSeat);
+
+        return screenRepository.save(newScreen);
     }
 
     // 상영관 조회 응답 dto 생성 메서드
