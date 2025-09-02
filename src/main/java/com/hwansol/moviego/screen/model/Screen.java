@@ -42,15 +42,12 @@ public class Screen extends BaseTImeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Screen(String name, List<Seat> seats, List<MovieSchedule> movieSchedules, LocalDateTime deletedAt) {
+    public Screen(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Screen 엔티티 생성 실패");
         }
 
         this.name = name;
-        this.seats = seats;
-        this.movieSchedules = movieSchedules;
-        this.deletedAt = deletedAt;
     }
 
     public void addSeat(Seat seat) {
@@ -83,5 +80,13 @@ public class Screen extends BaseTImeEntity {
         this.movieSchedules.add(movieSchedule);
 
         movieSchedule.relatedScreen(this);
+    }
+
+    public void softDelete() {
+        if (this.deletedAt != null) {
+            throw new IllegalStateException("이미 삭제된 데이터입니다.");
+        }
+
+        this.deletedAt = LocalDateTime.now();
     }
 }
