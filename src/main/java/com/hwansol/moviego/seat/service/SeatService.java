@@ -1,9 +1,9 @@
 package com.hwansol.moviego.seat.service;
 
 import com.hwansol.moviego.common.NotFoundException;
-import com.hwansol.moviego.seat.dto.SeatGetDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.repository.SeatRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +21,18 @@ public class SeatService {
      * @return 조회된 좌석 response dto
      */
     @Transactional(readOnly = true)
-    public SeatGetDto.Response getSeat(Long seatId) {
-        Seat seat = seatRepository.findById(seatId)
+    public Seat getSeat(Long seatId) {
+        return seatRepository.findById(seatId)
                 .orElseThrow(NotFoundException::new);
+    }
 
-        return SeatGetDto.Response.from(seat);
+    /**
+     * 좌석 전체 리스트 조회 서비스
+     *
+     * @return 조회된 좌석 전체 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<Seat> getSeatList() {
+        return seatRepository.findAll();
     }
 }
