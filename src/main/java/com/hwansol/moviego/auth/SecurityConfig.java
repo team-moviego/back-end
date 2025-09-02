@@ -72,25 +72,25 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequest -> authorizeRequest
-                        .requestMatchers(HttpMethod.GET, ALLOWED_URLS.get(HttpMethod.GET)).permitAll()
-                        .requestMatchers(HttpMethod.POST, ALLOWED_URLS.get(HttpMethod.POST)).permitAll()
-                        .anyRequest().authenticated()
-                )
+                                               .requestMatchers(HttpMethod.GET, ALLOWED_URLS.get(HttpMethod.GET)).permitAll()
+                                               .requestMatchers(HttpMethod.POST, ALLOWED_URLS.get(HttpMethod.POST)).permitAll()
+                                               .anyRequest().authenticated()
+                                      )
 
                 // oauth2 설정
                 .oauth2Login(oauth ->
-                        oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
-                                .successHandler(oAuth2SuccessHandler)
-                                .failureHandler((request, response, exception) -> {
-                                    log.error("OAuth2 로그인 실패", exception);
-                                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                                            "OAuth2 로그인 실패: " + exception.getMessage());
-                                }))
+                                     oauth.userInfoEndpoint(c -> c.userService(oAuth2UserService))
+                                             .successHandler(oAuth2SuccessHandler)
+                                             .failureHandler((request, response, exception) -> {
+                                                 log.error("OAuth2 로그인 실패", exception);
+                                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                                                                    "OAuth2 로그인 실패: " + exception.getMessage());
+                                             }))
 
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
-                                new JwtAuthenticationEntryPoint(objectMapper))
-                        .accessDeniedHandler(new JwtAccessDeniedHandler(objectMapper))
-                ) // 401, 403 에러 핸들러
+                                                   new JwtAuthenticationEntryPoint(objectMapper))
+                                           .accessDeniedHandler(new JwtAccessDeniedHandler(objectMapper))
+                                  ) // 401, 403 에러 핸들러
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headersConfigurer -> headersConfigurer.frameOptions(
                         HeadersConfigurer.FrameOptionsConfig::disable));
