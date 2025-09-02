@@ -1,13 +1,21 @@
 package com.hwansol.moviego.screen.controller;
 
+import com.hwansol.moviego.common.CommonResponseDto;
+import com.hwansol.moviego.screen.dto.ScreenCreateDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
+import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.service.ScreenService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,5 +54,25 @@ public class ScreenController {
         List<ScreenGetDto.Response> responseList = screenService.getScreenList();
 
         return ResponseEntity.ok(responseList);
+    }
+
+    /**
+     * 상영관 생성 컨트롤러
+     * 관리자만 생성 가능
+     *
+     * @param request ScreenCreateDto.Request
+     * @return 성공 시 201 코드와 생성된 상영관 엔티티 pk, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/screen")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponseDto> createScreenController(
+            @Valid
+            @RequestBody ScreenCreateDto.Request request
+                                                                   ) {
+        Screen screen = screenService.createScreen(request);
+        CommonResponseDto response = CommonResponseDto.from(screen.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 }
