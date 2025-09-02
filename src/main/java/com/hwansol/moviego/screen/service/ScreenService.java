@@ -1,12 +1,14 @@
 package com.hwansol.moviego.screen.service;
 
 import com.hwansol.moviego.common.DuplicatedException;
+import com.hwansol.moviego.common.HardDeleteException;
 import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
+import com.hwansol.moviego.screen.dto.ScreenDeleteDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ScreenService {
+
+    private static final String STRING_FOR_DELETE = "영구 삭제";
 
     private final ScreenRepository screenRepository;
     private final ImageService imageService;
@@ -79,6 +83,27 @@ public class ScreenService {
         return screenRepository.save(newScreen);
     }
 
+    /**
+     * 상영관 삭제 (하드딜리트)
+     *
+     * @param screenId 삭제할 상영관 pk
+     * @param request  ScreenDeleteDto.Request
+     * @return 삭제된 상영관 엔티티
+     */
+    @Transactional
+    public Screen deleteScreen(Long screenId, ScreenDeleteDto.Request request) {
+        if (!request.getDeleteString().equals(STRING_FOR_DELETE)) {
+            throw new HardDeleteException();
+        }
+
+        Screen screen = screenRepository.findById(screenId)
+                .orElseThrow(NotFoundException::new);
+
+        screenRepository.delete(screen);
+
+        return screen;
+    }
+
     // 상영관 조회 응답 dto 생성 메서드
     private ScreenGetDto.Response getScreenGetDtoResponse(Screen screen) {
         List<SeatGetDto.Response> seatList = screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
@@ -86,14 +111,14 @@ public class ScreenService {
                 .toList();
 
         List<MovieScheduleGetDto.Response> movieScheduleResponseList = screen.getMovieSchedules() == null ? new ArrayList<>() :
-                screen.getMovieSchedules().stream()
-                        .map(ms -> {
-                            List<Image> imageList = ms.getMovie().getImages();
-                            List<ImageGetDto.Response> imageResponse = imageService.getImageList(imageList);
+                                                                       screen.getMovieSchedules().stream()
+                                                                               .map(ms -> {
+                                                                                   List<Image> imageList = ms.getMovie().getImages();
+                                                                                   List<ImageGetDto.Response> imageResponse = imageService.getImageList(imageList);
 
-                            return MovieScheduleGetDto.Response.from(ms, imageResponse);
-                        })
-                        .toList();
+                                                                                   return MovieScheduleGetDto.Response.from(ms, imageResponse);
+                                                                               })
+                                                                               .toList();
 
         return ScreenGetDto.Response.from(screen, seatList, movieScheduleResponseList);
     }
