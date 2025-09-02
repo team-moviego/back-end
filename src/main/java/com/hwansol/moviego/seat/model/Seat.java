@@ -54,6 +54,19 @@ public class Seat extends BaseTImeEntity {
         this.deletedAt = deletedAt;
     }
 
+    // 테스트용
+    public void withId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("pk는 null, 0 또는 음수일 수 없습니다.");
+        }
+
+        if (this.id != null) {
+            throw new IllegalStateException("이미 pk값이 지정되어 있습니다.");
+        }
+
+        this.id = id;
+    }
+
     public void relatedScreen(Screen screen) {
         if (this.screen != null) {
             throw new IllegalStateException("이미 연결된 상태입니다.");
