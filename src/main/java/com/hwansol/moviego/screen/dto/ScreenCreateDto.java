@@ -42,26 +42,4 @@ public class ScreenCreateDto {
                     .build();
         }
     }
-
-    @Getter
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    @Builder(toBuilder = true)
-    public static class Response {
-
-        private Long id;
-
-        public Response(Long id) {
-            if (id == null || id <= 0) {
-                throw new IllegalArgumentException("ScreenCreateDto.Response 생성 실패");
-            }
-
-            this.id = id;
-        }
-
-        public static ScreenCreateDto.Response from(Screen screen) {
-            return ScreenCreateDto.Response.builder()
-                    .id(screen.getId())
-                    .build();
-        }
-    }
 }
