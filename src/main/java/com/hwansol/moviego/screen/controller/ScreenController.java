@@ -2,6 +2,7 @@ package com.hwansol.moviego.screen.controller;
 
 import com.hwansol.moviego.common.CommonResponseDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
+import com.hwansol.moviego.screen.dto.ScreenDeleteDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.service.ScreenService;
@@ -13,7 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,5 +77,25 @@ public class ScreenController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 상영관 삭제 컨트롤러
+     * 관리자만 가능
+     *
+     * @param screenId 삭제할 상영관 pk
+     * @param request  ScreenDeleteDto.Request
+     * @return 성공 시 200 코드와 삭제된 상영관 pk, 실패 시 에러코드와 에러메시지
+     */
+    @DeleteMapping("/screen/{screenId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponseDto> deleteScreenController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long screenId,
+            @Valid @RequestBody ScreenDeleteDto.Request request
+                                                                   ) {
+        Screen screen = screenService.deleteScreen(screenId, request);
+        CommonResponseDto response = CommonResponseDto.from(screen.getId());
+
+        return ResponseEntity.ok(response);
     }
 }
