@@ -10,19 +10,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("deleted_at IS NULL")
 public class Screen extends BaseTImeEntity {
 
     @Id
@@ -38,9 +35,6 @@ public class Screen extends BaseTImeEntity {
     @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovieSchedule> movieSchedules;
 
-    @Column
-    private LocalDateTime deletedAt;
-
     @Builder
     public Screen(String name) {
         if (name == null || name.isBlank()) {
@@ -48,6 +42,19 @@ public class Screen extends BaseTImeEntity {
         }
 
         this.name = name;
+    }
+
+    // 테스트용
+    public void withId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("pk는 null, 0 또는 음수일 수 없습니다.");
+        }
+
+        if (this.id != null) {
+            throw new IllegalStateException("pk 변경 불가");
+        }
+
+        this.id = id;
     }
 
     public void addSeat(Seat seat) {
@@ -80,13 +87,5 @@ public class Screen extends BaseTImeEntity {
         this.movieSchedules.add(movieSchedule);
 
         movieSchedule.relatedScreen(this);
-    }
-
-    public void softDelete() {
-        if (this.deletedAt != null) {
-            throw new IllegalStateException("이미 삭제된 데이터입니다.");
-        }
-
-        this.deletedAt = LocalDateTime.now();
     }
 }
