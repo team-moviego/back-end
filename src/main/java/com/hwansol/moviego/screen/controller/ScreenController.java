@@ -39,8 +39,7 @@ public class ScreenController {
      */
     @GetMapping("/screen")
     public ResponseEntity<ScreenGetDto.Response> getScreenController(
-            @Positive(message = "pk는 0 또는 음수일 수 없습니다.")
-            @RequestParam Long screenId
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam Long screenId
                                                                     ) {
         ScreenGetDto.Response response = screenService.getScreen(screenId);
 
@@ -69,8 +68,7 @@ public class ScreenController {
     @PostMapping("/screen")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponseDto> createScreenController(
-            @Valid
-            @RequestBody ScreenCreateDto.Request request
+            @Valid @RequestBody ScreenCreateDto.Request request
                                                                    ) {
         Screen screen = screenService.createScreen(request);
         CommonResponseDto response = CommonResponseDto.from(screen.getId());
