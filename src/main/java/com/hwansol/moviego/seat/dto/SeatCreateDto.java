@@ -39,7 +39,7 @@ public class SeatCreateDto {
         public Seat toEntity() {
             return Seat.builder()
                     .seatNum(this.seatNum)
-                    .seatRow(this.seatRow)
+                    .seatRow(this.seatRow.toUpperCase())
                     .build();
         }
     }
