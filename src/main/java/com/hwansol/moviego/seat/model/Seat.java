@@ -10,17 +10,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("deleted_at IS NULL")
 public class Seat extends BaseTImeEntity {
 
     @Id
@@ -37,11 +34,8 @@ public class Seat extends BaseTImeEntity {
     @JoinColumn(name = "screen_id", nullable = false)
     private Screen screen;
 
-    @Column
-    private LocalDateTime deletedAt;
-
     @Builder
-    public Seat(String seatRow, int seatNum, Screen screen, LocalDateTime deletedAt) {
+    public Seat(String seatRow, int seatNum, Screen screen) {
         boolean isValidateDataFail = seatNum <= 0 || seatRow == null || seatRow.isBlank();
 
         if (isValidateDataFail) {
@@ -51,7 +45,6 @@ public class Seat extends BaseTImeEntity {
         this.seatRow = seatRow;
         this.seatNum = seatNum;
         this.screen = screen;
-        this.deletedAt = deletedAt;
     }
 
     // 테스트용
