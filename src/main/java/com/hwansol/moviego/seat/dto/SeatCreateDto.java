@@ -25,7 +25,7 @@ public class SeatCreateDto {
         private Long screenId;
 
         public Request(String seatRow, int seatNum, Long screenId) {
-            boolean isValidateDataFail = seatRow == null || seatRow.isBlank() || seatNum <= 0 || screenId == null || screenId <= 0;
+            boolean isValidateDataFail = seatRow == null || seatRow.isBlank() || seatNum <= 0 || screenId <= 0;
 
             if (isValidateDataFail) {
                 throw new IllegalArgumentException("SeatCreateDto.Request 생성 실패");
@@ -40,28 +40,6 @@ public class SeatCreateDto {
             return Seat.builder()
                     .seatNum(this.seatNum)
                     .seatRow(this.seatRow)
-                    .build();
-        }
-    }
-
-    @Getter
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    @Builder(toBuilder = true)
-    public static class Response {
-
-        private Long id;
-
-        public Response(Long id) {
-            if (id == null || id <= 0) {
-                throw new IllegalArgumentException("SeatCreateDto.Response 생성 실패");
-            }
-
-            this.id = id;
-        }
-
-        public static SeatCreateDto.Response from(Seat seat) {
-            return SeatCreateDto.Response.builder()
-                    .id(seat.getId())
                     .build();
         }
     }
