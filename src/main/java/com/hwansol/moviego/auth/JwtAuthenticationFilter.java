@@ -40,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        String[] allowedUrls = SecurityConfig.ALLOWED_URLS.getOrDefault(HttpMethod.valueOf(method), null);
+        String[] allowedUrls = SecurityConfig.ALLOWED_URLS.getOrDefault(HttpMethod.valueOf(method),
+                                                                        null);
         if (allowedUrls != null) {
             String allowedUrl = Arrays.stream(allowedUrls)
                     .filter(u -> pathMatcher.match(u, requestURI))
@@ -55,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            FilterChain filterChain) throws ServletException, IOException {
         String accessToken = tokenProvider.resolveTokenFromRequest(request);
         if (accessToken != null && tokenProvider.validateToken(accessToken)) { // accessToken 유효한 경우
             setAuthenticated(accessToken);
@@ -65,7 +66,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Cookie refreshTokenCookie = cookieService.getRefreshTokenCookie(request);
         String refreshToken = refreshTokenCookie != null ? refreshTokenCookie.getValue() : null;
-        if (refreshToken != null && redisService.getBlackRefreshTokenFromRedis(refreshToken) != null) { // 리프레시 토큰이 블랙리스트인 경우
+        if (refreshToken != null && redisService.getBlackRefreshTokenFromRedis(
+                refreshToken) != null) { // 리프레시 토큰이 블랙리스트인 경우
             log.error("블랙리스트 토큰으로 요청 시도로 인한 거절 - {}", LocalDateTime.now());
             filterChain.doFilter(request, response);
             return;
@@ -73,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (refreshToken != null && tokenProvider.validateToken(refreshToken)) { // 리프레시 토큰이 유효한 경우
             String newAccessToken = regenerateAccessTokenToHeader(response,
-                    refreshToken); // 엑세스 토큰 재발급
+                                                                  refreshToken); // 엑세스 토큰 재발급
             if (newAccessToken == null) {
                 filterChain.doFilter(request, response);
                 return;
@@ -88,10 +90,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String regenerateAccessTokenToHeader(HttpServletResponse response,
-                                                 String refreshToken) {
+            String refreshToken) {
         String memberId = tokenProvider.getMemberId(refreshToken);
         String refreshTokenOfRedis = redisService.getRefreshTokenFromRedis(memberId);
-        if (!refreshToken.equals(refreshTokenOfRedis)) {
+
+        if (memberId == null || !refreshToken.equals(refreshTokenOfRedis)) {
             return null;
         }
 

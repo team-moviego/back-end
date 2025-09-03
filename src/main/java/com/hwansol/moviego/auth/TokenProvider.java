@@ -1,7 +1,5 @@
 package com.hwansol.moviego.auth;
 
-import com.hwansol.moviego.auth.exception.TokenErrorCode;
-import com.hwansol.moviego.auth.exception.TokenException;
 import com.hwansol.moviego.cookie.service.CookieService;
 import com.hwansol.moviego.member.service.MemberDetailsService;
 import com.hwansol.moviego.redis.service.RedisService;
@@ -11,7 +9,6 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.Key;
@@ -70,9 +67,10 @@ public class TokenProvider {
      * @param httpServletResponse HttpServletResponse
      */
     public void generateRefreshToken(String memberId, List<String> roles,
-                                     HttpServletResponse httpServletResponse) {
+            HttpServletResponse httpServletResponse) {
         String refreshToken = createToken(memberId, roles, refreshTokenExpire);
-        cookieService.setCookieToHttpResponse(httpServletResponse, refreshToken, refreshTokenExpire);
+        cookieService.setCookieToHttpResponse(httpServletResponse, refreshToken,
+                                              refreshTokenExpire);
         redisService.setRefreshTokenToRedis(memberId, refreshToken);
     }
 
@@ -84,9 +82,6 @@ public class TokenProvider {
      * @param response HttpServletResponse
      */
     public void logout(String userId, HttpServletRequest request, HttpServletResponse response) {
-        Cookie refreshTokenCookie = cookieService.getRefreshTokenCookie(request);
-        String refreshToken = refreshTokenCookie.getValue();
-
         cookieService.deleteRefreshTokenCookie(request, response); // refreshToken을 쿠키에서 지움
         redisService.deleteRefreshTokenFromRedis(userId);
 
@@ -96,7 +91,7 @@ public class TokenProvider {
     /**
      * jwt를 통해 회원 인증 정보를 가져온다.
      *
-     * @param jwt
+     * @param jwt 토큰
      * @return 회원의 인증 정보
      */
     @Transactional
@@ -104,7 +99,7 @@ public class TokenProvider {
         UserDetails userDetails = memberDetailsService.loadUserByUsername(getMemberId(jwt));
 
         return new UsernamePasswordAuthenticationToken(userDetails, "",
-                userDetails.getAuthorities());
+                                                       userDetails.getAuthorities());
     }
 
     /**
@@ -114,7 +109,13 @@ public class TokenProvider {
      * @return 회원 아이디
      */
     public String getMemberId(String token) {
-        return parseClaims(token).getSubject();
+        Claims claims = parseClaims(token);
+
+        if (claims == null) {
+            return null;
+        }
+
+        return claims.getSubject();
     }
 
     /**
@@ -124,7 +125,13 @@ public class TokenProvider {
      * @return 회원 권한
      */
     public List<String> getMemberRole(String token) {
-        return List.of(String.valueOf(parseClaims(token).get(KEY_ROLES)));
+        Claims claims = parseClaims(token);
+
+        if (claims == null) {
+            return null;
+        }
+
+        return List.of(String.valueOf(claims.get(KEY_ROLES)));
     }
 
     /**
@@ -156,6 +163,10 @@ public class TokenProvider {
 
         Claims claims = parseClaims(token);
 
+        if (claims == null) {
+            return false;
+        }
+
         return !claims.getExpiration().before(new Date());
     }
 
@@ -174,7 +185,8 @@ public class TokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            throw new TokenException(TokenErrorCode.EXPIRED_TOKEN);
+            log.error("토큰이 만료되었습니다.", e);
+            return null;
         }
     }
 
