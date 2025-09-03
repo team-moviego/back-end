@@ -13,7 +13,7 @@ import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
-import com.hwansol.moviego.seat.dto.SeatGetDto;
+import com.hwansol.moviego.seat.dto.SeatSimpleGetDto;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -107,11 +107,11 @@ public class ScreenService {
 
     // 상영관 조회 응답 dto 생성 메서드
     private ScreenGetDto.Response getScreenGetDtoResponse(Screen screen) {
-        List<SeatGetDto.Response> seatList =
+        List<SeatSimpleGetDto.Response> seatList =
                 screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
-                        .map(SeatGetDto.Response::from)
-                        .sorted(Comparator.comparing(SeatGetDto.Response::getSeatRow)
-                                        .thenComparing(SeatGetDto.Response::getSeatNum))
+                        .map(SeatSimpleGetDto.Response::from)
+                        .sorted(Comparator.comparing(SeatSimpleGetDto.Response::getSeatRow)
+                                        .thenComparing(SeatSimpleGetDto.Response::getSeatNum))
                         .toList();
 
         List<MovieScheduleGetDto.Response> movieScheduleResponseList =

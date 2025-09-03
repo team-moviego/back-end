@@ -2,7 +2,7 @@ package com.hwansol.moviego.screen.dto;
 
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
 import com.hwansol.moviego.screen.model.Screen;
-import com.hwansol.moviego.seat.dto.SeatGetDto;
+import com.hwansol.moviego.seat.dto.SeatSimpleGetDto;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,10 +18,11 @@ public class ScreenGetDto {
 
         private Long id;
         private String name;
-        private List<SeatGetDto.Response> seatList;
+        private List<SeatSimpleGetDto.Response> seatList;
         private List<MovieScheduleGetDto.Response> movieScheduleList;
 
-        public Response(Long id, String name, List<SeatGetDto.Response> seatList, List<MovieScheduleGetDto.Response> movieScheduleList) {
+        public Response(Long id, String name, List<SeatSimpleGetDto.Response> seatList,
+                List<MovieScheduleGetDto.Response> movieScheduleList) {
             boolean isValidateDataFail = id == null || id <= 0 || name == null || name.isBlank();
 
             if (isValidateDataFail) {
@@ -34,7 +35,9 @@ public class ScreenGetDto {
             this.movieScheduleList = movieScheduleList;
         }
 
-        public static ScreenGetDto.Response from(Screen screen, List<SeatGetDto.Response> seatList, List<MovieScheduleGetDto.Response> movieScheduleResponseList) {
+        public static ScreenGetDto.Response from(Screen screen,
+                List<SeatSimpleGetDto.Response> seatList,
+                List<MovieScheduleGetDto.Response> movieScheduleResponseList) {
             return Response.builder()
                     .id(screen.getId())
                     .name(screen.getName())
