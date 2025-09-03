@@ -4,6 +4,7 @@ import com.hwansol.moviego.seat.dto.SeatGetDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.service.SeatService;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,5 +36,22 @@ public class SeatController {
         SeatGetDto.Response response = SeatGetDto.Response.from(seat);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 좌석 전체 리스트 조회 컨트롤러
+     * 관리자만 조회 가능
+     *
+     * @return 성공 시 200 코드와 조회된 전체 좌석 response dto 리스트, 실패 시 에러코드와 에러메시지
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<SeatGetDto.Response>> getSeatListController() {
+        List<Seat> seatList = seatService.getSeatList();
+        List<SeatGetDto.Response> responseList = seatList.stream()
+                .map(SeatGetDto.Response::from)
+                .toList();
+
+        return ResponseEntity.ok(responseList);
     }
 }
