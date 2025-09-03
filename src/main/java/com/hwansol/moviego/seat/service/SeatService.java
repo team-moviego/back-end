@@ -9,6 +9,7 @@ import com.hwansol.moviego.seat.dto.SeatCreateDto;
 import com.hwansol.moviego.seat.dto.SeatDeleteDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.repository.SeatRepository;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,13 @@ public class SeatService {
      */
     @Transactional(readOnly = true)
     public List<Seat> getSeatList() {
-        return seatRepository.findAll();
+        List<Seat> seatList = seatRepository.findAll();
+
+        return seatList.stream()
+                .sorted(Comparator.comparing((Seat s) -> s.getScreen().getName())
+                                .thenComparing(Seat::getSeatRow)
+                                .thenComparing(Seat::getSeatNum))
+                .toList();
     }
 
     /**
@@ -59,7 +66,8 @@ public class SeatService {
         Seat seat = seatRepository.findBySeatRow(request.getSeatRow().toUpperCase())
                 .orElse(null);
 
-        boolean isDuplicated = seat != null && seat.getSeatNum() == request.getSeatNum() && seat.getScreen().getId().equals(screen.getId());
+        boolean isDuplicated = seat != null && seat.getSeatNum() == request.getSeatNum() && seat.getScreen()
+                .getId().equals(screen.getId());
         if (isDuplicated) {
             throw new DuplicatedException();
         }
