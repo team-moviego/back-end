@@ -2,6 +2,7 @@ package com.hwansol.moviego.seat.controller;
 
 import com.hwansol.moviego.common.CommonResponseDto;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
+import com.hwansol.moviego.seat.dto.SeatDeleteDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.service.SeatService;
@@ -13,7 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,5 +79,22 @@ public class SeatController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 좌석 삭제 컨트롤러
+     * 관리자만 삭제 가능
+     *
+     * @param seatId  삭제할 좌석 pk
+     * @param request SeatDeleteDto.Request
+     * @return 성공 시 200 코드와 삭제된 좌석 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @DeleteMapping("/seat/{seatId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponseDto> deleteSeatController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long seatId, @Valid @RequestBody SeatDeleteDto.Request request) {
+        Seat seat = seatService.deleteSeat(seatId, request);
+        CommonResponseDto response = CommonResponseDto.from(seat.getId());
+
+        return ResponseEntity.ok(response);
     }
 }
