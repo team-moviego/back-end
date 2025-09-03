@@ -1,15 +1,21 @@
 package com.hwansol.moviego.seat.controller;
 
+import com.hwansol.moviego.common.CommonResponseDto;
+import com.hwansol.moviego.seat.dto.SeatCreateDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.service.SeatService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,5 +59,22 @@ public class SeatController {
                 .toList();
 
         return ResponseEntity.ok(responseList);
+    }
+
+    /**
+     * 좌석 추가 생성 컨트롤러
+     * 관리자만 생성 가능
+     *
+     * @param request SeatCreateDto.Request
+     * @return 성공 시 201 코드와 생성된 좌석 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/seat")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponseDto> createSeatController(@Valid @RequestBody SeatCreateDto.Request request) {
+        Seat seat = seatService.createSeat(request);
+        CommonResponseDto response = CommonResponseDto.from(seat.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 }
