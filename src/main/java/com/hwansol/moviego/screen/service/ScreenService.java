@@ -15,6 +15,7 @@ import com.hwansol.moviego.screen.repository.ScreenRepository;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -106,19 +107,26 @@ public class ScreenService {
 
     // 상영관 조회 응답 dto 생성 메서드
     private ScreenGetDto.Response getScreenGetDtoResponse(Screen screen) {
-        List<SeatGetDto.Response> seatList = screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
-                .map(SeatGetDto.Response::from)
-                .toList();
+        List<SeatGetDto.Response> seatList =
+                screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
+                        .map(SeatGetDto.Response::from)
+                        .sorted(Comparator.comparing(SeatGetDto.Response::getSeatRow)
+                                        .thenComparing(SeatGetDto.Response::getSeatNum))
+                        .toList();
 
-        List<MovieScheduleGetDto.Response> movieScheduleResponseList = screen.getMovieSchedules() == null ? new ArrayList<>() :
-                                                                       screen.getMovieSchedules().stream()
-                                                                               .map(ms -> {
-                                                                                   List<Image> imageList = ms.getMovie().getImages();
-                                                                                   List<ImageGetDto.Response> imageResponse = imageService.getImageList(imageList);
+        List<MovieScheduleGetDto.Response> movieScheduleResponseList =
+                screen.getMovieSchedules() == null ? new ArrayList<>() :
+                screen.getMovieSchedules().stream()
+                        .map(ms -> {
+                            List<Image> imageList = ms.getMovie().getImages();
+                            List<ImageGetDto.Response> imageResponse = imageService.getImageList(
+                                    imageList);
 
-                                                                                   return MovieScheduleGetDto.Response.from(ms, imageResponse);
-                                                                               })
-                                                                               .toList();
+                            return MovieScheduleGetDto.Response.from(ms, imageResponse);
+                        })
+                        .sorted(Comparator.comparing(
+                                MovieScheduleGetDto.Response::getStartDateTime))
+                        .toList();
 
         return ScreenGetDto.Response.from(screen, seatList, movieScheduleResponseList);
     }
