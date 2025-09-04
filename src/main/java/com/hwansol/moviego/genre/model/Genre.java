@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -47,25 +46,5 @@ public class Genre extends BaseTImeEntity {
         }
 
         this.id = id;
-    }
-
-    public void addMovieGenre(MovieGenre movieGenre) {
-        if (movieGenre == null) {
-            throw new IllegalArgumentException("연관관계 추가 실패");
-        }
-
-        this.movieGenres = this.movieGenres == null ? new ArrayList<>() : this.movieGenres;
-
-        if (!this.movieGenres.isEmpty()) {
-            boolean isDuplicated = this.movieGenres.stream()
-                    .anyMatch(m -> m.getGenre().getName().equals(movieGenre.getGenre().getName()));
-
-            if (isDuplicated) {
-                throw new IllegalArgumentException("중복된 연관관계입니다.");
-            }
-        }
-
-        this.movieGenres.add(movieGenre);
-        movieGenre.relatedGenre(this);
     }
 }
