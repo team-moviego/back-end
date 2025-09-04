@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class GenreGetDto {
+public class GenreSimpleGetDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,7 +27,7 @@ public class GenreGetDto {
             this.name = name;
         }
 
-        public static GenreGetDto.Response from(Genre genre) {
+        public static GenreSimpleGetDto.Response from(Genre genre) {
             return Response.builder()
                     .id(genre.getId())
                     .name(genre.getName())

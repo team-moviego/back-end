@@ -2,7 +2,7 @@ package com.hwansol.moviego.genre.controller;
 
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreDeleteDto;
-import com.hwansol.moviego.genre.dto.GenreGetDto;
+import com.hwansol.moviego.genre.dto.GenreSimpleGetDto;
 import com.hwansol.moviego.genre.model.Genre;
 import com.hwansol.moviego.genre.service.GenreService;
 import jakarta.validation.Valid;
@@ -35,11 +35,11 @@ public class GenreController {
      * @return 성공 시 200 코드와 조회된 장르 리스트, 실패 시 에러코드와 에러메시지
      */
     @GetMapping
-    public ResponseEntity<List<GenreGetDto.Response>> getGenreListController() {
+    public ResponseEntity<List<GenreSimpleGetDto.Response>> getGenreListController() {
         List<Genre> genreList = genreService.getGenreList();
 
-        List<GenreGetDto.Response> response = genreList.stream()
-                .map(GenreGetDto.Response::from)
+        List<GenreSimpleGetDto.Response> response = genreList.stream()
+                .map(GenreSimpleGetDto.Response::from)
                 .toList();
 
         return ResponseEntity.ok(response);
@@ -53,7 +53,8 @@ public class GenreController {
      */
     @PostMapping("/genre")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GenreCreateDto.Response> createGenreController(@Valid @RequestBody GenreCreateDto.Request request) {
+    public ResponseEntity<GenreCreateDto.Response> createGenreController(
+            @Valid @RequestBody GenreCreateDto.Request request) {
         Genre genre = genreService.createGenre(request);
 
         GenreCreateDto.Response response = GenreCreateDto.Response.from(genre);
@@ -70,7 +71,8 @@ public class GenreController {
      */
     @DeleteMapping("/genre/{genreId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GenreDeleteDto.Response> deleteGenreController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId) {
+    public ResponseEntity<GenreDeleteDto.Response> deleteGenreController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId) {
         Genre genre = genreService.deleteGenre(genreId);
 
         GenreDeleteDto.Response response = GenreDeleteDto.Response.from(genre);
