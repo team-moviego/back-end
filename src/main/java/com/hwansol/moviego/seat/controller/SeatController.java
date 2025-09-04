@@ -2,7 +2,6 @@ package com.hwansol.moviego.seat.controller;
 
 import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
-import com.hwansol.moviego.seat.dto.SeatDeleteDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.service.SeatService;
@@ -74,10 +73,10 @@ public class SeatController {
      */
     @PostMapping("/seat")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto> createSeatController(
+    public ResponseEntity<CommonDto.Response> createSeatController(
             @Valid @RequestBody SeatCreateDto.Request request) {
         Seat seat = seatService.createSeat(request);
-        CommonDto response = CommonDto.from(seat.getId());
+        CommonDto.Response response = CommonDto.Response.from(seat.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -93,11 +92,11 @@ public class SeatController {
      */
     @DeleteMapping("/seat/{seatId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto> deleteSeatController(
+    public ResponseEntity<CommonDto.Response> deleteSeatController(
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long seatId,
-            @Valid @RequestBody SeatDeleteDto.Request request) {
+            @Valid @RequestBody CommonDto.DeleteRequest request) {
         Seat seat = seatService.deleteSeat(seatId, request);
-        CommonDto response = CommonDto.from(seat.getId());
+        CommonDto.Response response = CommonDto.Response.from(seat.getId());
 
         return ResponseEntity.ok(response);
     }

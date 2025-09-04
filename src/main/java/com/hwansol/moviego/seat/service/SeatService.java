@@ -1,12 +1,12 @@
 package com.hwansol.moviego.seat.service;
 
+import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.common.DuplicatedException;
 import com.hwansol.moviego.common.HardDeleteException;
 import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
-import com.hwansol.moviego.seat.dto.SeatDeleteDto;
 import com.hwansol.moviego.seat.model.Seat;
 import com.hwansol.moviego.seat.repository.SeatRepository;
 import java.util.Comparator;
@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class SeatService {
-
-    private static final String STRING_FOR_DELETE = "영구 삭제";
 
     private final SeatRepository seatRepository;
     private final ScreenRepository screenRepository;
@@ -86,13 +84,13 @@ public class SeatService {
      * @return 삭제된 좌석 엔티티
      */
     @Transactional
-    public Seat deleteSeat(Long seatId, SeatDeleteDto.Request request) {
-        if (!request.getDeleteString().equals(STRING_FOR_DELETE)) {
-            throw new HardDeleteException();
-        }
-
+    public Seat deleteSeat(Long seatId, CommonDto.DeleteRequest request) {
         Seat seat = seatRepository.findById(seatId)
                 .orElseThrow(NotFoundException::new);
+
+        if (!request.getDeleteString().equals(seat.getSeatRow() + seat.getSeatNum())) {
+            throw new HardDeleteException();
+        }
 
         seatRepository.delete(seat);
 

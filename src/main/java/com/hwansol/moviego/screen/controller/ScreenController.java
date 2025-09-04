@@ -2,7 +2,6 @@ package com.hwansol.moviego.screen.controller;
 
 import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
-import com.hwansol.moviego.screen.dto.ScreenDeleteDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.service.ScreenService;
@@ -67,11 +66,11 @@ public class ScreenController {
      */
     @PostMapping("/screen")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto> createScreenController(
+    public ResponseEntity<CommonDto.Response> createScreenController(
             @Valid @RequestBody ScreenCreateDto.Request request
     ) {
         Screen screen = screenService.createScreen(request);
-        CommonDto response = CommonDto.from(screen.getId());
+        CommonDto.Response response = CommonDto.Response.from(screen.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -87,12 +86,12 @@ public class ScreenController {
      */
     @DeleteMapping("/screen/{screenId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto> deleteScreenController(
+    public ResponseEntity<CommonDto.Response> deleteScreenController(
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long screenId,
-            @Valid @RequestBody ScreenDeleteDto.Request request
+            @Valid @RequestBody CommonDto.DeleteRequest request
     ) {
         Screen screen = screenService.deleteScreen(screenId, request);
-        CommonDto response = CommonDto.from(screen.getId());
+        CommonDto.Response response = CommonDto.Response.from(screen.getId());
 
         return ResponseEntity.ok(response);
     }

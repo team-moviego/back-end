@@ -1,5 +1,6 @@
 package com.hwansol.moviego.screen.service;
 
+import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.common.DuplicatedException;
 import com.hwansol.moviego.common.HardDeleteException;
 import com.hwansol.moviego.common.NotFoundException;
@@ -8,7 +9,6 @@ import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
-import com.hwansol.moviego.screen.dto.ScreenDeleteDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
@@ -24,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ScreenService {
-
-    private static final String STRING_FOR_DELETE = "영구 삭제";
 
     private final ScreenRepository screenRepository;
     private final ImageService imageService;
@@ -92,13 +90,13 @@ public class ScreenService {
      * @return 삭제된 상영관 엔티티
      */
     @Transactional
-    public Screen deleteScreen(Long screenId, ScreenDeleteDto.Request request) {
-        if (!request.getDeleteString().equals(STRING_FOR_DELETE)) {
-            throw new HardDeleteException();
-        }
-
+    public Screen deleteScreen(Long screenId, CommonDto.DeleteRequest request) {
         Screen screen = screenRepository.findById(screenId)
                 .orElseThrow(NotFoundException::new);
+
+        if (!request.getDeleteString().equals(screen.getName())) {
+            throw new HardDeleteException();
+        }
 
         screenRepository.delete(screen);
 

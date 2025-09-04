@@ -1,7 +1,7 @@
 package com.hwansol.moviego.genre.controller;
 
+import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
-import com.hwansol.moviego.genre.dto.GenreDeleteDto;
 import com.hwansol.moviego.genre.dto.GenreSimpleGetDto;
 import com.hwansol.moviego.genre.model.Genre;
 import com.hwansol.moviego.genre.service.GenreService;
@@ -53,11 +53,11 @@ public class GenreController {
      */
     @PostMapping("/genre")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GenreCreateDto.Response> createGenreController(
+    public ResponseEntity<CommonDto.Response> createGenreController(
             @Valid @RequestBody GenreCreateDto.Request request) {
         Genre genre = genreService.createGenre(request);
 
-        GenreCreateDto.Response response = GenreCreateDto.Response.from(genre);
+        CommonDto.Response response = CommonDto.Response.from(genre.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -67,15 +67,17 @@ public class GenreController {
      * 장르 하드 삭제 컨트롤러
      *
      * @param genreId 삭제할 장르 pk
+     * @param request CommonDto.DeleteRequest
      * @return 성공 시 200 코드와 삭제한 장르 pk, 실패 시 에러코드와 에러메시지
      */
     @DeleteMapping("/genre/{genreId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GenreDeleteDto.Response> deleteGenreController(
-            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId) {
-        Genre genre = genreService.deleteGenre(genreId);
+    public ResponseEntity<CommonDto.Response> deleteGenreController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId,
+            @Valid @RequestBody CommonDto.DeleteRequest request) {
+        Genre genre = genreService.deleteGenre(genreId, request);
 
-        GenreDeleteDto.Response response = GenreDeleteDto.Response.from(genre);
+        CommonDto.Response response = CommonDto.Response.from(genre.getId());
 
         return ResponseEntity.ok(response);
     }
