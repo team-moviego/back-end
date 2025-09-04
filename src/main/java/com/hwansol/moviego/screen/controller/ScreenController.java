@@ -1,6 +1,6 @@
 package com.hwansol.moviego.screen.controller;
 
-import com.hwansol.moviego.common.CommonResponseDto;
+import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
 import com.hwansol.moviego.screen.dto.ScreenDeleteDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
@@ -40,7 +40,7 @@ public class ScreenController {
     @GetMapping("/screen")
     public ResponseEntity<ScreenGetDto.Response> getScreenController(
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam Long screenId
-                                                                    ) {
+    ) {
         ScreenGetDto.Response response = screenService.getScreen(screenId);
 
         return ResponseEntity.ok(response);
@@ -67,11 +67,11 @@ public class ScreenController {
      */
     @PostMapping("/screen")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponseDto> createScreenController(
+    public ResponseEntity<CommonDto> createScreenController(
             @Valid @RequestBody ScreenCreateDto.Request request
-                                                                   ) {
+    ) {
         Screen screen = screenService.createScreen(request);
-        CommonResponseDto response = CommonResponseDto.from(screen.getId());
+        CommonDto response = CommonDto.from(screen.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -87,12 +87,12 @@ public class ScreenController {
      */
     @DeleteMapping("/screen/{screenId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponseDto> deleteScreenController(
+    public ResponseEntity<CommonDto> deleteScreenController(
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long screenId,
             @Valid @RequestBody ScreenDeleteDto.Request request
-                                                                   ) {
+    ) {
         Screen screen = screenService.deleteScreen(screenId, request);
-        CommonResponseDto response = CommonResponseDto.from(screen.getId());
+        CommonDto response = CommonDto.from(screen.getId());
 
         return ResponseEntity.ok(response);
     }

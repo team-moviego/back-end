@@ -1,6 +1,6 @@
 package com.hwansol.moviego.seat.controller;
 
-import com.hwansol.moviego.common.CommonResponseDto;
+import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
 import com.hwansol.moviego.seat.dto.SeatDeleteDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
@@ -40,7 +40,8 @@ public class SeatController {
      */
     @GetMapping("/seat")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SeatGetDto.Response> getSeatController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam Long seatId) {
+    public ResponseEntity<SeatGetDto.Response> getSeatController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam Long seatId) {
         Seat seat = seatService.getSeat(seatId);
         SeatGetDto.Response response = SeatGetDto.Response.from(seat);
 
@@ -73,9 +74,10 @@ public class SeatController {
      */
     @PostMapping("/seat")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponseDto> createSeatController(@Valid @RequestBody SeatCreateDto.Request request) {
+    public ResponseEntity<CommonDto> createSeatController(
+            @Valid @RequestBody SeatCreateDto.Request request) {
         Seat seat = seatService.createSeat(request);
-        CommonResponseDto response = CommonResponseDto.from(seat.getId());
+        CommonDto response = CommonDto.from(seat.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -91,9 +93,11 @@ public class SeatController {
      */
     @DeleteMapping("/seat/{seatId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponseDto> deleteSeatController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long seatId, @Valid @RequestBody SeatDeleteDto.Request request) {
+    public ResponseEntity<CommonDto> deleteSeatController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long seatId,
+            @Valid @RequestBody SeatDeleteDto.Request request) {
         Seat seat = seatService.deleteSeat(seatId, request);
-        CommonResponseDto response = CommonResponseDto.from(seat.getId());
+        CommonDto response = CommonDto.from(seat.getId());
 
         return ResponseEntity.ok(response);
     }

@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(toBuilder = true)
-public class CommonResponseDto {
+public class CommonDto {
 
     private Long id;
 
-    public CommonResponseDto(Long id) {
+    public CommonDto(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("CommonDto.Response 생성 실패");
         }
@@ -20,8 +20,8 @@ public class CommonResponseDto {
         this.id = id;
     }
 
-    public static CommonResponseDto from(Long id) {
-        return CommonResponseDto.builder()
+    public static CommonDto from(Long id) {
+        return CommonDto.builder()
                 .id(id)
                 .build();
     }
