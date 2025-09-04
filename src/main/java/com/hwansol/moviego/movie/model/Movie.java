@@ -71,7 +71,9 @@ public class Movie extends BaseTImeEntity {
     private LocalDateTime deletedAt; // 삭제 날짜
 
     @Builder
-    public Movie(String titleKo, String titleEn, String description, List<MovieDirector> directors, List<MovieActor> actors, List<MovieGenre> genres, List<Image> images, int totalShowTime, MovieRating rating, LocalDateTime releaseDate, double gradeAverage, double reservationRate, LocalDateTime deletedAt) {
+    public Movie(String titleKo, String titleEn, String description, int totalShowTime,
+            MovieRating rating, LocalDateTime releaseDate, double gradeAverage,
+            double reservationRate) {
         boolean isValidDataFalse = titleKo == null || titleKo.isBlank() || titleEn == null || titleEn.isBlank() || description == null || description.isBlank() || totalShowTime <= 0 || rating == null || gradeAverage < 0 || reservationRate < 0;
 
         if (isValidDataFalse) {
@@ -81,16 +83,11 @@ public class Movie extends BaseTImeEntity {
         this.titleKo = titleKo;
         this.titleEn = titleEn;
         this.description = description;
-        this.directors = directors;
-        this.actors = actors;
-        this.genres = genres;
-        this.images = images;
         this.totalShowTime = totalShowTime;
         this.rating = rating;
         this.releaseDate = releaseDate;
         this.gradeAverage = gradeAverage;
         this.reservationRate = reservationRate;
-        this.deletedAt = deletedAt;
     }
 
     public void addMovieGenre(MovieGenre movieGenre) {
@@ -100,7 +97,8 @@ public class Movie extends BaseTImeEntity {
 
         this.genres = this.genres == null ? new ArrayList<>() : this.genres;
 
-        if (this.genres.stream().anyMatch(g -> g.getGenre().getName().equals(movieGenre.getGenre().getName()))) {
+        if (this.genres.stream()
+                .anyMatch(g -> g.getGenre().getName().equals(movieGenre.getGenre().getName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
@@ -115,7 +113,8 @@ public class Movie extends BaseTImeEntity {
 
         this.actors = this.actors == null ? new ArrayList<>() : this.actors;
 
-        if (this.actors.stream().anyMatch(a -> a.getActor().getName().equals(movieActor.getActor().getName()))) {
+        if (this.actors.stream()
+                .anyMatch(a -> a.getActor().getName().equals(movieActor.getActor().getName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
@@ -130,7 +129,8 @@ public class Movie extends BaseTImeEntity {
 
         this.directors = this.directors == null ? new ArrayList<>() : this.directors;
 
-        if (this.directors.stream().anyMatch(d -> d.getDirector().getName().equals(movieDirector.getDirector().getName()))) {
+        if (this.directors.stream().anyMatch(
+                d -> d.getDirector().getName().equals(movieDirector.getDirector().getName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 
@@ -145,7 +145,8 @@ public class Movie extends BaseTImeEntity {
 
         this.images = this.images == null ? new ArrayList<>() : this.images;
 
-        if (this.images.stream().anyMatch(f -> f.getStoreImageName().equals(image.getStoreImageName()))) {
+        if (this.images.stream()
+                .anyMatch(f -> f.getStoreImageName().equals(image.getStoreImageName()))) {
             throw new IllegalArgumentException("이미 연결된 연관관계입니다.");
         }
 

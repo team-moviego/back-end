@@ -9,18 +9,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("deleted_at IS NULL")
 public class Genre extends BaseTImeEntity {
 
     @Id
@@ -33,25 +31,41 @@ public class Genre extends BaseTImeEntity {
     @OneToMany(mappedBy = "genre", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<MovieGenre> movieGenres;
 
-    @Column
-    private LocalDateTime deletedAt;
-
     @Builder
-    public Genre(String name, List<MovieGenre> movieGenres, LocalDateTime deletedAt) {
+    public Genre(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Genre 엔티티 생성 실패");
         }
 
         this.name = name;
-        this.movieGenres = movieGenres;
-        this.deletedAt = deletedAt;
     }
 
+    // 테스트코드용
     public void withId(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Genre 엔티티 생성 실패");
         }
 
         this.id = id;
+    }
+
+    public void addMovieGenre(MovieGenre movieGenre) {
+        if (movieGenre == null) {
+            throw new IllegalArgumentException("연관관계 추가 실패");
+        }
+
+        this.movieGenres = this.movieGenres == null ? new ArrayList<>() : this.movieGenres;
+
+        if (!this.movieGenres.isEmpty()) {
+            boolean isDuplicated = this.movieGenres.stream()
+                    .anyMatch(m -> m.getGenre().getName().equals(movieGenre.getGenre().getName()));
+
+            if (isDuplicated) {
+                throw new IllegalArgumentException("중복된 연관관계입니다.");
+            }
+        }
+
+        this.movieGenres.add(movieGenre);
+        movieGenre.relatedGenre(this);
     }
 }
