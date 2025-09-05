@@ -1,11 +1,15 @@
 package com.hwansol.moviego.director.service;
 
+import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.DuplicatedException;
+import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
 import com.hwansol.moviego.director.model.Director;
 import com.hwansol.moviego.director.repository.DirectorRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +22,33 @@ public class DirectorService {
      *
      * @return 조회된 감독 리스트 dto
      */
+    @Transactional(readOnly = true)
     public List<DirectorSimpleGetDto.Response> getDirectorList() {
         List<Director> directorList = directorRepository.findAll();
 
         return directorList.stream()
                 .map(DirectorSimpleGetDto.Response::from)
                 .toList();
+    }
+
+    /**
+     * 감독 생성 서비스
+     *
+     * @param request 감독 생성에 필요한 이름 필드 정보를 가지고 있는 Request dto 클래스
+     * @return 생성된 감독 엔티티 dto
+     */
+    @Transactional
+    public CommonDto.Response createDirector(DirectorCreateDto.Request request) {
+        Director director = directorRepository.findByName(request.getName())
+                .orElse(null);
+
+        if (director != null) {
+            throw new DuplicatedException();
+        }
+
+        Director newDirector = request.toEntity();
+        Director savedDirector = directorRepository.save(newDirector);
+
+        return CommonDto.Response.from(savedDirector.getId());
     }
 }
