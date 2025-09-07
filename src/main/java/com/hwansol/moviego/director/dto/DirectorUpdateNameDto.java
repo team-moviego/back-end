@@ -1,6 +1,7 @@
 package com.hwansol.moviego.director.dto;
 
 import com.hwansol.moviego.director.model.Director;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ public class DirectorUpdateNameDto {
     @Builder(toBuilder = true)
     public static class Request {
 
+        @NotBlank(message = "변경할 감독명을 입력해주세요.")
         private String newName;
 
         public Request(String newName) {
