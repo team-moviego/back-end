@@ -3,6 +3,7 @@ package com.hwansol.moviego.genre.controller;
 import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreSimpleGetDto;
+import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
 import com.hwansol.moviego.genre.model.Genre;
 import com.hwansol.moviego.genre.service.GenreService;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +63,22 @@ public class GenreController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 장르명 변경 컨트롤러
+     *
+     * @param genreId 변경할 장르의 pk
+     * @param request 변경할 장르명이 담긴 request dto
+     * @return 성공 시 200 코드와 변경된 장르의 pk를 담은 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @PatchMapping("/genre/{genreId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> updateGenreNameController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId, @Valid @RequestBody GenreUpdateNameDto.Request request) {
+        Genre genre = genreService.updateGenreName(genreId, request);
+        CommonDto.Response response = CommonDto.Response.from(genre.getId());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
