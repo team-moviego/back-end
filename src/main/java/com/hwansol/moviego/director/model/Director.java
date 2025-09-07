@@ -38,4 +38,12 @@ public class Director extends BaseTImeEntity {
 
         this.name = name;
     }
+
+    public void updateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("감독명 변경 실패");
+        }
+
+        this.name = name;
+    }
 }
