@@ -58,6 +58,7 @@ public class GenreService {
      * @param request 변경할 장르명을 담고있는 request dto
      * @return 변경된 장르 엔티티
      */
+    @Transactional
     public Genre updateGenreName(Long genreId, GenreUpdateNameDto.Request request) {
         Genre genre = genreRepository.findById(genreId)
                 .orElseThrow(NotFoundException::new);
