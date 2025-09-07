@@ -38,4 +38,12 @@ public class Actor extends BaseTImeEntity {
 
         this.name = name;
     }
+
+    public void updateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("배우명 변경 실패");
+        }
+
+        this.name = name;
+    }
 }
