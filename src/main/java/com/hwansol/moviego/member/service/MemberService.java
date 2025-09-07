@@ -1,6 +1,7 @@
 package com.hwansol.moviego.member.service;
 
 import com.hwansol.moviego.auth.TokenProvider;
+import com.hwansol.moviego.common.AlreadyDeletedException;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.member.dto.MemberAuthCheckDto;
 import com.hwansol.moviego.member.dto.MemberAuthMailDto;
@@ -192,10 +193,10 @@ public class MemberService {
         }
 
         tokenProvider.generateRefreshToken(member.getUserId(), List.of(member.getRole().getName()),
-                response);
+                                           response);
 
         return tokenProvider.generateAccessToken(member.getUserId(),
-                List.of(member.getRole().getName()));
+                                                 List.of(member.getRole().getName()));
     }
 
     /**
@@ -258,7 +259,7 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if (member.getDeletedAt() != null) {
-            throw new MemberException(MemberErrorCode.ALREADY_DELETED);
+            throw new AlreadyDeletedException();
         }
 
         member = member.toBuilder()
