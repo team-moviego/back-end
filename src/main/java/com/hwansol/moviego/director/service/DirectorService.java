@@ -6,6 +6,7 @@ import com.hwansol.moviego.common.HardDeleteException;
 import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
+import com.hwansol.moviego.director.dto.DirectorUpdateNameDto;
 import com.hwansol.moviego.director.model.Director;
 import com.hwansol.moviego.director.repository.DirectorRepository;
 import java.util.List;
@@ -52,6 +53,30 @@ public class DirectorService {
         Director savedDirector = directorRepository.save(newDirector);
 
         return CommonDto.Response.from(savedDirector.getId());
+    }
+
+    /**
+     * 감독명 변경 서비스
+     *
+     * @param directorId 감독명을 변경할 감독 pk
+     * @param request    변경할 감독명 정보를 가지고 있는 request dto
+     * @return 감독명이 변경된 엔티티의 pk를 담고 있는 response dto
+     */
+    @Transactional
+    public CommonDto.Response updateDirectorName(Long directorId, DirectorUpdateNameDto.Request request) {
+        Director director = directorRepository.findById(directorId)
+                .orElseThrow(NotFoundException::new);
+
+        Director existedDirector = directorRepository.findByName(request.getNewName())
+                .orElse(null);
+
+        if (existedDirector != null) {
+            throw new DuplicatedException();
+        }
+
+        director.updateName(request.getNewName());
+
+        return CommonDto.Response.from(director.getId());
     }
 
     /**
