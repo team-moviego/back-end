@@ -54,6 +54,13 @@ public class DirectorService {
         return CommonDto.Response.from(savedDirector.getId());
     }
 
+    /**
+     * 감독 제거 컨트롤러
+     *
+     * @param directorId 제거할 감독 pk
+     * @param request    영구 제거를 위한 문구를 포함하고 있는 request dto
+     * @return 제거된 감독 엔티티의 pk를 담은 response dto
+     */
     @Transactional
     public CommonDto.Response deleteDirector(Long directorId, CommonDto.DeleteRequest request) {
         Director director = directorRepository.findById(directorId)
