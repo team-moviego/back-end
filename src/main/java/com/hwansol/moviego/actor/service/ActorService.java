@@ -2,10 +2,12 @@ package com.hwansol.moviego.actor.service;
 
 import com.hwansol.moviego.actor.dto.ActorCreateDto;
 import com.hwansol.moviego.actor.dto.ActorSimpleGetDto;
+import com.hwansol.moviego.actor.dto.ActorUpdateNameDto;
 import com.hwansol.moviego.actor.model.Actor;
 import com.hwansol.moviego.actor.repository.ActorRepository;
 import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.common.DuplicatedException;
+import com.hwansol.moviego.common.NotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,5 +52,29 @@ public class ActorService {
         Actor savedActor = actorRepository.save(newActor);
 
         return CommonDto.Response.from(savedActor.getId());
+    }
+
+    /**
+     * 배우명 변경 서비스
+     *
+     * @param ActorId 배우명 변경할 배우 엔티티 pk
+     * @param request 변경할 배우명 정보를 가지고 있는 request dto
+     * @return 배우명이 변경된 배우 엔티티의 pk 정보를 담고 있는 response dto
+     */
+    @Transactional
+    public CommonDto.Response updateActorName(Long ActorId, ActorUpdateNameDto.Request request) {
+        Actor actor = actorRepository.findById(ActorId)
+                .orElseThrow(NotFoundException::new);
+
+        Actor existedActor = actorRepository.findByName(request.getNewName())
+                .orElse(null);
+
+        if (existedActor != null) {
+            throw new DuplicatedException();
+        }
+
+        actor.updateName(request.getNewName());
+
+        return CommonDto.Response.from(actor.getId());
     }
 }
