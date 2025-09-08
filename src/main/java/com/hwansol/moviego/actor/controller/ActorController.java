@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,6 +76,23 @@ public class ActorController {
             @Valid @RequestBody
             ActorUpdateNameDto.Request request) {
         CommonDto.Response response = actorService.updateActorName(actorId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 배우 영구 삭제 컨트롤러
+     *
+     * @param actorId 영구 삭제할 엔티티의 pk
+     * @param request 영구 삭제를 위한 문구 정보를 담고 있는 request dto
+     * @return 성공 시 200 코드와 삭제된 엔티티의 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @DeleteMapping("/actor/{actorId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> deleteActorController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long actorId,
+            @Valid @RequestBody CommonDto.DeleteRequest request) {
+        CommonDto.Response response = actorService.deleteActor(actorId, request);
 
         return ResponseEntity.ok(response);
     }
