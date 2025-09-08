@@ -1,7 +1,6 @@
 package com.hwansol.moviego.redis.service;
 
-import com.hwansol.moviego.redis.exception.RedisErrorCode;
-import com.hwansol.moviego.redis.exception.RedisException;
+import com.hwansol.moviego.common.NotFoundException;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,7 @@ public class RedisService {
     public String getRefreshTokenFromRedis(String key) {
         String refreshToken = redisTemplate.opsForValue().get(REFRESH_TOKEN_KEY_PREFIX + key);
         if (refreshToken == null) {
-            throw new RedisException(RedisErrorCode.NOT_EXIST_REFRESH_TOKEN);
+            throw new NotFoundException();
         }
 
         return refreshToken;
@@ -50,7 +49,7 @@ public class RedisService {
         String blackRefreshToken = redisTemplate.opsForValue()
                 .get(BLACK_REFRESH_TOKEN_KEY_PREFIX + key);
         if (blackRefreshToken == null) {
-            throw new RedisException(RedisErrorCode.NOT_EXIST_REFRESH_TOKEN);
+            throw new NotFoundException();
         }
 
         return blackRefreshToken;
@@ -65,7 +64,7 @@ public class RedisService {
     public String getAuthNumFromRedis(String key) {
         String authNum = redisTemplate.opsForValue().get(AUTH_NUM_KEY_PREFIX + key);
         if (authNum == null) {
-            throw new RedisException(RedisErrorCode.NOT_EXIST_AUTH);
+            throw new NotFoundException();
         }
 
         return authNum;
@@ -80,7 +79,7 @@ public class RedisService {
     public String getIsAuthFromRedis(String key) {
         String isAuth = redisTemplate.opsForValue().get(IS_AUTH_KEY_PREFIX + key);
         if (isAuth == null) {
-            throw new RedisException(RedisErrorCode.NOT_EXIST_AUTH);
+            throw new NotFoundException();
         }
 
         return isAuth;

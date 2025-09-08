@@ -55,11 +55,11 @@ public class DirectorService {
     }
 
     /**
-     * 감독 하드 삭제 서비스
+     * 감독 제거 컨트롤러
      *
-     * @param directorId 삭제할 감독 pk
-     * @param request    영구 삭제를 위한 문구를 담고 있는 Request dto
-     * @return 삭제된 감독 엔티티의 pk 정보를 담고 있는 Response dto
+     * @param directorId 제거할 감독 pk
+     * @param request    영구 제거를 위한 문구를 포함하고 있는 request dto
+     * @return 제거된 감독 엔티티의 pk를 담은 response dto
      */
     @Transactional
     public CommonDto.Response deleteDirector(Long directorId, CommonDto.DeleteRequest request) {

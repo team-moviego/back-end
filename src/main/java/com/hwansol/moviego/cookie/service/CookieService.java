@@ -1,7 +1,6 @@
 package com.hwansol.moviego.cookie.service;
 
-import com.hwansol.moviego.cookie.exception.CookieErrorCode;
-import com.hwansol.moviego.cookie.exception.CookieException;
+import com.hwansol.moviego.common.NotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,13 +23,13 @@ public class CookieService {
     public Cookie getRefreshTokenCookie(HttpServletRequest httpServletRequest) {
         Cookie[] cookies = httpServletRequest.getCookies();
         if (cookies == null) {
-            throw new CookieException(CookieErrorCode.NOT_FOUND_COOKIE);
+            throw new NotFoundException();
         }
 
         return Arrays.stream(cookies)
                 .filter(c -> c.getName().equals(REFRESH_TOKEN_COOKIE_NAME))
                 .findFirst()
-                .orElseThrow(() -> new CookieException(CookieErrorCode.NOT_FOUND_COOKIE));
+                .orElseThrow(NotFoundException::new);
     }
 
     /**

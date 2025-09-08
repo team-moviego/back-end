@@ -50,7 +50,7 @@ public class DirectorController {
     @PostMapping("/director")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonDto.Response> createDirectorController(@Valid @RequestBody
-    DirectorCreateDto.Request request) {
+                                                                       DirectorCreateDto.Request request) {
         CommonDto.Response response = directorService.createDirector(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,17 +58,15 @@ public class DirectorController {
     }
 
     /**
-     * 감독 삭제 컨트롤러
+     * 감독 제거 컨트롤러
      *
-     * @param directorId 삭제할 감독 pk
-     * @param request
-     * @return
+     * @param directorId 제거할 감독 pk
+     * @param request    영구 삭제를 위한 문구 정보가 포함된 request dto
+     * @return 성공 시 200 코드와 삭제된 감독 엔티티 ㅔk를 담은 response dto, 실패 시 에러코드와 에러메시지
      */
     @DeleteMapping("/director/{directorId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto.Response> deleteDirectorController(
-            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId,
-            @Valid @RequestBody CommonDto.DeleteRequest request) {
+    public ResponseEntity<CommonDto.Response> deleteDirectorController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId, @Valid @RequestBody CommonDto.DeleteRequest request) {
         CommonDto.Response response = directorService.deleteDirector(directorId, request);
 
         return ResponseEntity.ok(response);

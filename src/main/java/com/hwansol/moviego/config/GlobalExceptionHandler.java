@@ -1,10 +1,7 @@
 package com.hwansol.moviego.config;
 
-import com.hwansol.moviego.common.BusinessLogicException;
-import com.hwansol.moviego.cookie.exception.CookieException;
 import com.hwansol.moviego.mail.exception.MailException;
 import com.hwansol.moviego.member.exception.MemberException;
-import com.hwansol.moviego.redis.exception.RedisException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
@@ -32,8 +29,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    private ResponseEntity<String> handleAuthorizationDeniedException(
-            AuthorizationDeniedException e) {
+    private ResponseEntity<String> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
         log.error("403 Forbidden");
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -161,30 +157,6 @@ public class GlobalExceptionHandler {
         log.error("메일 관련 에러 발생", e);
 
         return ResponseEntity.internalServerError()
-                .body(e.getMessage());
-    }
-
-    @ExceptionHandler(CookieException.class)
-    private ResponseEntity<String> handleCookieException(CookieException e) {
-        log.error("쿠키 관련 에러 발생", e);
-
-        return ResponseEntity.badRequest()
-                .body(e.getMessage());
-    }
-
-    @ExceptionHandler(RedisException.class)
-    private ResponseEntity<String> handleRedisException(RedisException e) {
-        log.error("레디스 관련 에러 발생", e);
-
-        return ResponseEntity.badRequest()
-                .body(e.getMessage());
-    }
-
-    @ExceptionHandler(BusinessLogicException.class)
-    private ResponseEntity<String> handleBusinessLoginException(BusinessLogicException e) {
-        log.error("비즈니스 로직 에러 발생", e);
-
-        return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(e.getMessage());
     }
 
