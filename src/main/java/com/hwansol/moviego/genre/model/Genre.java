@@ -47,4 +47,12 @@ public class Genre extends BaseTImeEntity {
 
         this.id = id;
     }
+
+    public void updateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("장르명 변경 실패");
+        }
+
+        this.name = name;
+    }
 }
