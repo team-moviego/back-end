@@ -7,6 +7,7 @@ import com.hwansol.moviego.actor.model.Actor;
 import com.hwansol.moviego.actor.repository.ActorRepository;
 import com.hwansol.moviego.common.CommonDto;
 import com.hwansol.moviego.common.DuplicatedException;
+import com.hwansol.moviego.common.HardDeleteException;
 import com.hwansol.moviego.common.NotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,27 @@ public class ActorService {
         }
 
         actor.updateName(request.getNewName());
+
+        return CommonDto.Response.from(actor.getId());
+    }
+
+    /**
+     * 배우 하드 삭제 서비스
+     *
+     * @param actorId 삭제할 배우 pk
+     * @param request 영구 삭제를 위한 문구 정보를 담고 있는 request dto
+     * @return 삭제된 엔티티의 pk 정보를 담고 있는 response dto
+     */
+    @Transactional
+    public CommonDto.Response deleteActor(Long actorId, CommonDto.DeleteRequest request) {
+        Actor actor = actorRepository.findById(actorId)
+                .orElseThrow(NotFoundException::new);
+
+        if (!actor.getName().equals(request.getDeleteString())) {
+            throw new HardDeleteException();
+        }
+
+        actorRepository.delete(actor);
 
         return CommonDto.Response.from(actor.getId());
     }
