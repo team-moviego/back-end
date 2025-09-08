@@ -5,6 +5,7 @@ import com.hwansol.moviego.common.DuplicatedException;
 import com.hwansol.moviego.common.HardDeleteException;
 import com.hwansol.moviego.common.NotFoundException;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
+import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
 import com.hwansol.moviego.genre.model.Genre;
 import com.hwansol.moviego.genre.repository.GenreRepository;
 import java.util.List;
@@ -48,6 +49,30 @@ public class GenreService {
         Genre newGenre = request.toEntity();
 
         return genreRepository.save(newGenre);
+    }
+
+    /**
+     * 장르명 변경 서비스
+     *
+     * @param genreId 변경할 장르 pk
+     * @param request 변경할 장르명 정보를 담고 있는 request dto
+     * @return 장르명이 변경된 엔티티
+     */
+    @Transactional
+    public Genre updateGenreName(Long genreId, GenreUpdateNameDto.Request request) {
+        Genre genre = genreRepository.findById(genreId)
+                .orElseThrow(NotFoundException::new);
+
+        Genre existedGenre = genreRepository.findByName(request.getNewName())
+                .orElse(null);
+
+        if (existedGenre != null) {
+            throw new DuplicatedException();
+        }
+
+        genre.updateName(request.getNewName());
+
+        return genre;
     }
 
     /**
