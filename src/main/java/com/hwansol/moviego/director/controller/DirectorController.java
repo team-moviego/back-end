@@ -5,13 +5,16 @@ import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
 import com.hwansol.moviego.director.service.DirectorService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,5 +55,22 @@ public class DirectorController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 감독 삭제 컨트롤러
+     *
+     * @param directorId 삭제할 감독 pk
+     * @param request
+     * @return
+     */
+    @DeleteMapping("/director/{directorId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> deleteDirectorController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId,
+            @Valid @RequestBody CommonDto.DeleteRequest request) {
+        CommonDto.Response response = directorService.deleteDirector(directorId, request);
+
+        return ResponseEntity.ok(response);
     }
 }
