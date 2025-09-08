@@ -11,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,11 +39,8 @@ public class MovieScheduleSeat {
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
-    @Column
-    private LocalDateTime deletedAt;
-
     @Builder
-    public MovieScheduleSeat(SeatStatus seatStatus, MovieSchedule movieSchedule, Seat seat, LocalDateTime deletedAt) {
+    public MovieScheduleSeat(SeatStatus seatStatus, MovieSchedule movieSchedule, Seat seat) {
         if (seatStatus == null) {
             throw new IllegalArgumentException("MovieScheduleSeat 엔티티 생성 실패");
         }
@@ -52,7 +48,6 @@ public class MovieScheduleSeat {
         this.seatStatus = seatStatus;
         this.movieSchedule = movieSchedule;
         this.seat = seat;
-        this.deletedAt = deletedAt;
     }
 
     public void relatedMovieSchedule(MovieSchedule movieSchedule) {
