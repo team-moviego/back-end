@@ -1,4 +1,4 @@
-package com.hwansol.moviego.common;
+package com.hwansol.moviego.common.dto;
 
 import java.util.List;
 import lombok.AccessLevel;
@@ -20,7 +20,8 @@ public class PageListResponseDto<T> {
     private boolean isLast; // 마지막 페이지 여부
     private List<T> content; // 데이터
 
-    public PageListResponseDto(int totalPage, long totalElements, int curPageNumber, int curPageSize, boolean isFirst, boolean isLast, List<T> content) {
+    public PageListResponseDto(int totalPage, long totalElements, int curPageNumber,
+            int curPageSize, boolean isFirst, boolean isLast, List<T> content) {
         boolean isValidateDataFail = totalPage < 0 || totalElements < 0 || curPageNumber < 0 || curPageSize <= 0;
 
         if (isValidateDataFail) {

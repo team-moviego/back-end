@@ -4,7 +4,7 @@ import com.hwansol.moviego.actor.dto.ActorCreateDto;
 import com.hwansol.moviego.actor.dto.ActorSimpleGetDto;
 import com.hwansol.moviego.actor.dto.ActorUpdateNameDto;
 import com.hwansol.moviego.actor.service.ActorService;
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;

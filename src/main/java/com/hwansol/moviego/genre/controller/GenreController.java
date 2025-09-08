@@ -1,6 +1,6 @@
 package com.hwansol.moviego.genre.controller;
 
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreSimpleGetDto;
 import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;

@@ -1,6 +1,6 @@
 package com.hwansol.moviego.seat.controller;
 
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
 import com.hwansol.moviego.seat.dto.SeatGetDto;
 import com.hwansol.moviego.seat.model.Seat;

@@ -1,6 +1,6 @@
 package com.hwansol.moviego.cookie.service;
 
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +39,8 @@ public class CookieService {
      * @param refreshToken        리프레시 토큰
      * @param expire              만료
      */
-    public void setCookieToHttpResponse(HttpServletResponse httpServletResponse, String refreshToken, long expire) {
+    public void setCookieToHttpResponse(HttpServletResponse httpServletResponse,
+            String refreshToken, long expire) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .maxAge((int) expire / 1000)
                 .path("/")
@@ -57,7 +58,8 @@ public class CookieService {
      * @param httpServletRequest  HttpServletRequest
      * @param httpServletResponse HttpServletResponse
      */
-    public void deleteRefreshTokenCookie(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public void deleteRefreshTokenCookie(HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
         Cookie refreshTokenCookie = getRefreshTokenCookie(httpServletRequest);
 
         refreshTokenCookie.setMaxAge(0);

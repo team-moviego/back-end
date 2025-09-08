@@ -1,9 +1,9 @@
 package com.hwansol.moviego.screen.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;

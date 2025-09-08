@@ -1,7 +1,7 @@
 package com.hwansol.moviego.image.exception;
 
-import com.hwansol.moviego.common.BusinessLogicException;
-import com.hwansol.moviego.common.ErrorCode;
+import com.hwansol.moviego.common.exception.BusinessLogicException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 
 public class ReadImageException extends BusinessLogicException {
 

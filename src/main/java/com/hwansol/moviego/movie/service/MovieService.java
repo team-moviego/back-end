@@ -1,7 +1,7 @@
 package com.hwansol.moviego.movie.service;
 
-import com.hwansol.moviego.common.AlreadyDeletedException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.exception.AlreadyDeletedException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movie.dto.MovieGetDto;
@@ -51,7 +51,8 @@ public class MovieService {
      * @return 페이지네이션 처리된 영화 전체 리스트
      */
     @Transactional(readOnly = true)
-    public Page<Movie> getMovieList(String word, String genreName, String orderTypeString, Pageable pageable) {
+    public Page<Movie> getMovieList(String word, String genreName, String orderTypeString,
+            Pageable pageable) {
         OrderType orderType = Arrays.stream(OrderType.values())
                 .filter(o -> o.name().equals(orderTypeString.toUpperCase()))
                 .findAny()

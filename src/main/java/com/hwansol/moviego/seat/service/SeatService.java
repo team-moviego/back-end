@@ -1,9 +1,9 @@
 package com.hwansol.moviego.seat.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;

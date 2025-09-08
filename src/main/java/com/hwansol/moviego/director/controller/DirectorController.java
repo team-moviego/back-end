@@ -1,6 +1,6 @@
 package com.hwansol.moviego.director.controller;
 
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
 import com.hwansol.moviego.director.dto.DirectorUpdateNameDto;

@@ -1,9 +1,9 @@
 package com.hwansol.moviego.director.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
 import com.hwansol.moviego.director.dto.DirectorUpdateNameDto;

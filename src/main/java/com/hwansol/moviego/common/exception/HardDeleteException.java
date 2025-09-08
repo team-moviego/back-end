@@ -1,4 +1,4 @@
-package com.hwansol.moviego.common;
+package com.hwansol.moviego.common.exception;
 
 public class HardDeleteException extends BusinessLogicException {
 

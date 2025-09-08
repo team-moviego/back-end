@@ -1,6 +1,6 @@
 package com.hwansol.moviego.redis.service;
 
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -93,7 +93,8 @@ public class RedisService {
      */
     public void setRefreshTokenToRedis(String key, String refreshToken) {
         redisTemplate.opsForValue()
-                .set(REFRESH_TOKEN_KEY_PREFIX + key, refreshToken, refreshTokenExpire, TimeUnit.MILLISECONDS);
+                .set(REFRESH_TOKEN_KEY_PREFIX + key, refreshToken, refreshTokenExpire,
+                     TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -129,7 +130,8 @@ public class RedisService {
             redisTemplate.delete(REFRESH_TOKEN_KEY_PREFIX + key);
 
             redisTemplate.opsForValue()
-                    .set(BLACK_REFRESH_TOKEN_KEY_PREFIX + refreshToken, "black", refreshTokenExpire, TimeUnit.MILLISECONDS);
+                    .set(BLACK_REFRESH_TOKEN_KEY_PREFIX + refreshToken, "black", refreshTokenExpire,
+                         TimeUnit.MILLISECONDS);
         }
     }
 

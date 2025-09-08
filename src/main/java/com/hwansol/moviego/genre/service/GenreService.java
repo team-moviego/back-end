@@ -1,9 +1,9 @@
 package com.hwansol.moviego.genre.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
 import com.hwansol.moviego.genre.model.Genre;
