@@ -45,7 +45,7 @@ public class MovieScheduleGetDto {
         }
 
         public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule,
-                List<ImageGetDto.Response> imageList) {
+                List<ImageGetDto.Response> movieImageList) {
             List<MovieScheduleSeat> movieScheduleSeats = movieSchedule.getMovieScheduleSeats();
             List<MovieScheduleSeatSimpleGetDto.Response> movieScheduleSeatList = movieScheduleSeats.stream()
                     .map(MovieScheduleSeatSimpleGetDto.Response::from)
@@ -53,7 +53,7 @@ public class MovieScheduleGetDto {
 
             return MovieScheduleGetDto.Response.builder()
                     .id(movieSchedule.getId())
-                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), imageList))
+                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), movieImageList))
                     .screenInfo(ScreenSimpleGetDto.Response.from(movieSchedule.getScreen()))
                     .startDateTime(movieSchedule.getStartDateTime())
                     .endDateTime(movieSchedule.getEndDateTime())
