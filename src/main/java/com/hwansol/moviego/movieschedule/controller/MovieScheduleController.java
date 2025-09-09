@@ -28,7 +28,7 @@ public class MovieScheduleController {
      * @return 성공 시 200 코드와 조회된 영화 스케줄의 상세 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
      */
     @GetMapping("/movie-schedule")
-    public ResponseEntity<MovieScheduleGetDto.Response> getMovieSchedule(
+    public ResponseEntity<MovieScheduleGetDto.Response> getMovieScheduleController(
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam Long movieScheduleId
     ) {
         MovieScheduleGetDto.Response response = movieScheduleService.getMovieSchedule(movieScheduleId);
@@ -43,7 +43,7 @@ public class MovieScheduleController {
      * @return 성공 시 200 코드와 조회된 영화 스케줄 리스트의 간단 정보를 담고 있는 response dto 리스트, 실패 시 에러코드와 에러메시지
      */
     @GetMapping
-    public ResponseEntity<List<MovieScheduleSimpleGetDto.Response>> getMovieScheduleList(
+    public ResponseEntity<List<MovieScheduleSimpleGetDto.Response>> getMovieScheduleListController(
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam(required = false)
             Long screenId
     ) {
