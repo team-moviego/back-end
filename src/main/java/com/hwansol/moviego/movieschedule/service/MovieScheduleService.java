@@ -5,9 +5,11 @@ import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
+import com.hwansol.moviego.movieschedule.dto.MovieScheduleSimpleGetDto;
 import com.hwansol.moviego.movieschedule.model.MovieSchedule;
 import com.hwansol.moviego.movieschedule.repository.MovieScheduleRepository;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,5 +41,27 @@ public class MovieScheduleService {
         }
 
         return MovieScheduleGetDto.Response.from(movieSchedule, movieImageList);
+    }
+
+    /**
+     * 전체 영화 스케줄 리스트 조회 서비스
+     *
+     * @return 조회된 전체 영화 스케줄의 간단 정보를 담고 있는 response dto 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<MovieScheduleSimpleGetDto.Response> getMovieScheduleList() {
+        List<MovieSchedule> movieScheduleList = movieScheduleRepository.findAll();
+        List<MovieScheduleSimpleGetDto.Response> movieScheduleListResult = new ArrayList<>();
+
+        if (!movieScheduleList.isEmpty()) {
+            movieScheduleListResult = movieScheduleList.stream()
+                    .map(MovieScheduleSimpleGetDto.Response::from)
+                    .sorted(Comparator.comparing(MovieScheduleSimpleGetDto.Response::getScreenName)
+                                    .thenComparing(
+                                            MovieScheduleSimpleGetDto.Response::getStartDateTime))
+                    .toList();
+        }
+
+        return movieScheduleListResult;
     }
 }
