@@ -1,4 +1,4 @@
-package com.hwansol.moviego.movie.exception;
+package com.hwansol.moviego.movieschedule.exception;
 
 import com.hwansol.moviego.common.exception.BusinessLogicException;
 import com.hwansol.moviego.common.exception.ErrorCode;
