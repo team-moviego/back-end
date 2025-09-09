@@ -2,6 +2,7 @@ package com.hwansol.moviego.movieschedule.service;
 
 import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.common.exception.ErrorCode;
+import com.hwansol.moviego.common.exception.HardDeleteException;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
@@ -31,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MovieScheduleService {
+
+    private final String STRING_FOR_HARD_DELETE = "영구 삭제";
 
     private final MovieScheduleRepository movieScheduleRepository;
     private final ScreenRepository screenRepository;
@@ -164,5 +167,31 @@ public class MovieScheduleService {
         MovieSchedule savedMovieSchedule = movieScheduleRepository.save(newMovieSchedule);
 
         return CommonDto.Response.from(savedMovieSchedule.getId());
+    }
+
+    /**
+     * 영화 스케줄 영구 삭제 서비스
+     *
+     * @param movieScheduleId 영구 삭제할 영화 스케줄 pk
+     * @param request         영구 삭제를 위한 문구 정보를 담고 있는 request dto
+     * @return 영구 삭제된 영화 스케줄의 pk 정보를 담고 있는 response dto
+     */
+    @Transactional
+    public CommonDto.Response deleteMovieSchedule(
+            Long movieScheduleId,
+            CommonDto.DeleteRequest request
+    ) {
+        MovieSchedule movieSchedule = movieScheduleRepository.findById(movieScheduleId)
+                .orElseThrow(NotFoundException::new);
+
+        // todo: 예약자가 존재하는지 확인 필요
+
+        if (!request.getDeleteString().equals(STRING_FOR_HARD_DELETE)) {
+            throw new HardDeleteException();
+        }
+
+        movieScheduleRepository.delete(movieSchedule);
+
+        return CommonDto.Response.from(movieSchedule.getId());
     }
 }
