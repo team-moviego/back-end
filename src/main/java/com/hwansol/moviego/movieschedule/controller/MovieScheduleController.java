@@ -13,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,5 +77,23 @@ public class MovieScheduleController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 영화 스케줄 삭제 컨트롤러
+     *
+     * @param movieScheduleId 삭제할 엔티티 pk
+     * @param request         영구 삭제를 위한 문구 정보를 담고 있는 request dto
+     * @return 성공 시 200 코드와 삭제된 엔티티 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @DeleteMapping("/movie-schedule/{movieScheduleId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> deleteMovieScheduleController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long movieScheduleId,
+            @Valid @RequestBody CommonDto.DeleteRequest request
+    ) {
+        CommonDto.Response response = movieScheduleService.deleteMovieSchedule(movieScheduleId, request);
+
+        return ResponseEntity.ok(response);
     }
 }
