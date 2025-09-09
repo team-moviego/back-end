@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
     FAIL_CREATE_MOVIE_SCHEDULE_BY_TIME(HttpStatus.BAD_REQUEST.value(),
-                                       "영화 스케줄의 시간대가 겹치거나 청소 시간과 겹칩니다."),
+                                       "해당 시간대에 영화 스케줄을 생성할 수 없습니다."),
     HARD_DELETE_FAIL(HttpStatus.BAD_REQUEST.value(), "영구 삭제에 실패하였습니다."),
     DUPLICATED(HttpStatus.BAD_REQUEST.value(), "이미 존재합니다."),
     READ_IMAGE_FAIL(HttpStatus.BAD_REQUEST.value(), "r2에서 이미지를 가져오는데 실패하였습니다."),
