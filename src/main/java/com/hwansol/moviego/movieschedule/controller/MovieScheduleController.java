@@ -37,8 +37,9 @@ public class MovieScheduleController {
     }
 
     /**
-     * 전체 영화 스케줄 리스트 조회 컨트롤러
+     * 전체 또는 특정 상영관의 영화 스케줄 리스트 조회 컨트롤러
      *
+     * @param screenId 상영관 pk, 특정 상영관의 영화 스케줄을 조회하고자 할 경우에만 사용함
      * @return 성공 시 200 코드와 조회된 영화 스케줄 리스트의 간단 정보를 담고 있는 response dto 리스트, 실패 시 에러코드와 에러메시지
      */
     @GetMapping
@@ -46,11 +47,7 @@ public class MovieScheduleController {
             @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @RequestParam(required = false)
             Long screenId
     ) {
-        List<MovieScheduleSimpleGetDto.Response> response = movieScheduleService.getMovieScheduleList();
-
-        if (screenId != null) {
-            response = movieScheduleService.getMovieScheduleListByScreen(screenId);
-        }
+        List<MovieScheduleSimpleGetDto.Response> response = movieScheduleService.getMovieScheduleList(screenId);
 
         return ResponseEntity.ok(response);
     }

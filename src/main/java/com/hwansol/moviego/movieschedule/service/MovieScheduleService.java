@@ -64,14 +64,23 @@ public class MovieScheduleService {
     /**
      * 전체 영화 스케줄 리스트 조회 서비스
      *
+     * @param screenId 상영관 pk, 상영관의 영화스케줄을 조회하고 하는 경우에만 사용함
      * @return 조회된 전체 영화 스케줄의 간단 정보를 담고 있는 response dto 리스트, 없을 경우 empty list
      */
     @Transactional(readOnly = true)
-    public List<MovieScheduleSimpleGetDto.Response> getMovieScheduleList() {
+    public List<MovieScheduleSimpleGetDto.Response> getMovieScheduleList(Long screenId) {
         List<MovieSchedule> movieScheduleList = movieScheduleRepository.findAll();
+
+        if (screenId != null) {
+            Screen screen = screenRepository.findById(screenId)
+                    .orElseThrow(NotFoundException::new);
+
+            movieScheduleList = screen.getMovieSchedules();
+        }
+
         List<MovieScheduleSimpleGetDto.Response> movieScheduleListResult = new ArrayList<>();
 
-        if (!movieScheduleList.isEmpty()) {
+        if (movieScheduleList != null && !movieScheduleList.isEmpty()) {
             movieScheduleListResult = movieScheduleList.stream()
                     .map(MovieScheduleSimpleGetDto.Response::from)
                     .sorted(Comparator.comparing(
@@ -82,31 +91,6 @@ public class MovieScheduleService {
         }
 
         return movieScheduleListResult;
-    }
-
-    /**
-     * 특정 상영관의 영화 스케줄 리스트 조회 서비스
-     *
-     * @param ScreenId 영화 스케줄을 조회할 상영관 pk
-     * @return 특정 상영관에서 조회된 영화 스케줄의 간단 정보를 담고 있는 response dto 리스트, 없을 경우 empty list
-     */
-    @Transactional(readOnly = true)
-    public List<MovieScheduleSimpleGetDto.Response> getMovieScheduleListByScreen(Long ScreenId) {
-        Screen screen = screenRepository.findById(ScreenId)
-                .orElseThrow(NotFoundException::new);
-
-        List<MovieSchedule> movieSchedules = screen.getMovieSchedules();
-        List<MovieScheduleSimpleGetDto.Response> movieScheduleList = new ArrayList<>();
-
-        if (movieSchedules != null && !movieSchedules.isEmpty()) {
-            movieScheduleList = movieSchedules.stream()
-                    .map(MovieScheduleSimpleGetDto.Response::from)
-                    .sorted(Comparator.comparing(
-                            MovieScheduleSimpleGetDto.Response::getStartDateTime))
-                    .toList();
-        }
-
-        return movieScheduleList;
     }
 
     /**
