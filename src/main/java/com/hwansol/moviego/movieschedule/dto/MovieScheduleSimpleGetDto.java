@@ -1,7 +1,6 @@
 package com.hwansol.moviego.movieschedule.dto;
 
-import com.hwansol.moviego.image.dto.ImageGetDto;
-import com.hwansol.moviego.movie.dto.MovieGetDto;
+import com.hwansol.moviego.movie.dto.MovieSimpleGetDto;
 import com.hwansol.moviego.movieschedule.model.MovieSchedule;
 import com.hwansol.moviego.movieschedule.model.MovieScheduleSeat;
 import com.hwansol.moviego.movieschedule.model.SeatStatus;
@@ -13,7 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class MovieScheduleListGetDto {
+public class MovieScheduleSimpleGetDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,14 +20,14 @@ public class MovieScheduleListGetDto {
     public static class Response {
 
         private Long id;
-        private MovieGetDto.Response movieInfo;
+        private MovieSimpleGetDto.Response movieInfo;
         private LocalDateTime startDateTime;
         private LocalDateTime endDateTime;
         private String screenName;
         private int totalSeat;
         private int availableSeat;
 
-        public Response(Long id, MovieGetDto.Response movieInfo, LocalDateTime startDateTime,
+        public Response(Long id, MovieSimpleGetDto.Response movieInfo, LocalDateTime startDateTime,
                 LocalDateTime endDateTime, String screenName, int totalSeat, int availableSeat) {
             boolean isValidateDataFail = id == null || id <= 0 || movieInfo == null || startDateTime == null || endDateTime == null || screenName == null || screenName.isBlank() || totalSeat <= 0 || availableSeat < 0;
 
@@ -45,8 +44,7 @@ public class MovieScheduleListGetDto {
             this.availableSeat = availableSeat;
         }
 
-        public static MovieScheduleListGetDto.Response from(MovieSchedule movieSchedule,
-                List<ImageGetDto.Response> imageList) {
+        public static MovieScheduleSimpleGetDto.Response from(MovieSchedule movieSchedule) {
             List<MovieScheduleSeat> availableSeats =
                     movieSchedule.getMovieScheduleSeats() == null ? new ArrayList<>() :
                     movieSchedule.getMovieScheduleSeats().stream()
@@ -55,7 +53,7 @@ public class MovieScheduleListGetDto {
 
             return Response.builder()
                     .id(movieSchedule.getId())
-                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), imageList))
+                    .movieInfo(MovieSimpleGetDto.Response.from(movieSchedule.getMovie()))
                     .startDateTime(movieSchedule.getStartDateTime())
                     .endDateTime(movieSchedule.getEndDateTime())
                     .screenName(movieSchedule.getScreen().getName())
