@@ -37,7 +37,6 @@ public class MovieService {
                 .orElseThrow(NotFoundException::new);
 
         List<ImageGetDto.Response> imageList = imageService.getImageList(movie.getImages());
-
         return MovieGetDto.Response.from(movie, imageList);
     }
 
