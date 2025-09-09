@@ -4,8 +4,6 @@ import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.common.exception.DuplicatedException;
 import com.hwansol.moviego.common.exception.HardDeleteException;
 import com.hwansol.moviego.common.exception.NotFoundException;
-import com.hwansol.moviego.image.dto.ImageGetDto;
-import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleSimpleGetDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
@@ -109,21 +107,14 @@ public class ScreenService {
                 screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
                         .map(SeatSimpleGetDto.Response::from)
                         .sorted(Comparator.comparing(SeatSimpleGetDto.Response::getSeatRow)
-                                        .thenComparing(SeatSimpleGetDto.Response::getSeatNum))
+                                .thenComparing(SeatSimpleGetDto.Response::getSeatNum))
                         .toList();
 
         List<MovieScheduleSimpleGetDto.Response> movieScheduleResponseList =
                 screen.getMovieSchedules() == null ? new ArrayList<>() :
                 screen.getMovieSchedules().stream()
-                        .map(ms -> {
-                            List<Image> imageList = ms.getMovie().getImages();
-                            List<ImageGetDto.Response> imageResponse = imageService.getImageList(
-                                    imageList);
-
-                            return MovieScheduleSimpleGetDto.Response.from(ms);
-                        })
-                        .sorted(Comparator.comparing(
-                                MovieScheduleSimpleGetDto.Response::getStartDateTime))
+                        .map(MovieScheduleSimpleGetDto.Response::from)
+                        .sorted(Comparator.comparing(MovieScheduleSimpleGetDto.Response::getStartDateTime))
                         .toList();
 
         return ScreenGetDto.Response.from(screen, seatList, movieScheduleResponseList);
