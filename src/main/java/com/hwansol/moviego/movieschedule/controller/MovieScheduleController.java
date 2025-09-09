@@ -1,14 +1,21 @@
 package com.hwansol.moviego.movieschedule.controller;
 
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.movieschedule.dto.MovieScheduleCreateDto;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleSimpleGetDto;
 import com.hwansol.moviego.movieschedule.service.MovieScheduleService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,5 +57,23 @@ public class MovieScheduleController {
         List<MovieScheduleSimpleGetDto.Response> response = movieScheduleService.getMovieScheduleList(screenId);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 영화 스케줄 생성 컨트롤러
+     *
+     * @param request 영화 스케줄 생성을 위한 영화 pk, 상영관 pk, 영화 시작/종료 시간 정보를 담고 있는 request dto
+     * @return 성공 시 201 코드와 생성된 엔티티의 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/movie-schedule")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> createMovieScheduleController(
+            @Valid @RequestBody
+            MovieScheduleCreateDto.Request request
+    ) {
+        CommonDto.Response response = movieScheduleService.createMovieSchedule(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 }
