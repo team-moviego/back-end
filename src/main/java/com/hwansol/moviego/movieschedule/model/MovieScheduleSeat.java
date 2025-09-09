@@ -40,14 +40,12 @@ public class MovieScheduleSeat {
     private Seat seat;
 
     @Builder
-    public MovieScheduleSeat(SeatStatus seatStatus, MovieSchedule movieSchedule, Seat seat) {
+    public MovieScheduleSeat(SeatStatus seatStatus) {
         if (seatStatus == null) {
             throw new IllegalArgumentException("MovieScheduleSeat 엔티티 생성 실패");
         }
 
         this.seatStatus = seatStatus;
-        this.movieSchedule = movieSchedule;
-        this.seat = seat;
     }
 
     public void relatedMovieSchedule(MovieSchedule movieSchedule) {
