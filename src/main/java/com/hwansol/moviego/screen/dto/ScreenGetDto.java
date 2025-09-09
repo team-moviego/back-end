@@ -1,6 +1,6 @@
 package com.hwansol.moviego.screen.dto;
 
-import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
+import com.hwansol.moviego.movieschedule.dto.MovieScheduleListGetDto;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.seat.dto.SeatSimpleGetDto;
 import java.util.List;
@@ -19,10 +19,10 @@ public class ScreenGetDto {
         private Long id;
         private String name;
         private List<SeatSimpleGetDto.Response> seatList;
-        private List<MovieScheduleGetDto.Response> movieScheduleList;
+        private List<MovieScheduleListGetDto.Response> movieScheduleList;
 
         public Response(Long id, String name, List<SeatSimpleGetDto.Response> seatList,
-                List<MovieScheduleGetDto.Response> movieScheduleList) {
+                List<MovieScheduleListGetDto.Response> movieScheduleList) {
             boolean isValidateDataFail = id == null || id <= 0 || name == null || name.isBlank();
 
             if (isValidateDataFail) {
@@ -37,7 +37,7 @@ public class ScreenGetDto {
 
         public static ScreenGetDto.Response from(Screen screen,
                 List<SeatSimpleGetDto.Response> seatList,
-                List<MovieScheduleGetDto.Response> movieScheduleResponseList) {
+                List<MovieScheduleListGetDto.Response> movieScheduleResponseList) {
             return Response.builder()
                     .id(screen.getId())
                     .name(screen.getName())

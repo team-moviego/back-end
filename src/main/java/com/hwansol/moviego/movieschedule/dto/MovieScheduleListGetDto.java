@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class MovieScheduleGetDto {
+public class MovieScheduleListGetDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,7 +28,8 @@ public class MovieScheduleGetDto {
         private int totalSeat;
         private int availableSeat;
 
-        public Response(Long id, MovieGetDto.Response movieInfo, LocalDateTime startDateTime, LocalDateTime endDateTime, String screenName, int totalSeat, int availableSeat) {
+        public Response(Long id, MovieGetDto.Response movieInfo, LocalDateTime startDateTime,
+                LocalDateTime endDateTime, String screenName, int totalSeat, int availableSeat) {
             boolean isValidateDataFail = id == null || id <= 0 || movieInfo == null || startDateTime == null || endDateTime == null || screenName == null || screenName.isBlank() || totalSeat <= 0 || availableSeat < 0;
 
             if (isValidateDataFail) {
@@ -44,8 +45,10 @@ public class MovieScheduleGetDto {
             this.availableSeat = availableSeat;
         }
 
-        public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule, List<ImageGetDto.Response> imageList) {
-            List<MovieScheduleSeat> availableSeats = movieSchedule.getMovieScheduleSeats() == null ? new ArrayList<>() :
+        public static MovieScheduleListGetDto.Response from(MovieSchedule movieSchedule,
+                List<ImageGetDto.Response> imageList) {
+            List<MovieScheduleSeat> availableSeats =
+                    movieSchedule.getMovieScheduleSeats() == null ? new ArrayList<>() :
                     movieSchedule.getMovieScheduleSeats().stream()
                             .filter(s -> s.getSeatStatus().equals(SeatStatus.AVAILABLE))
                             .toList();

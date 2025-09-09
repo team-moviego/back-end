@@ -7,7 +7,7 @@ import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
 import com.hwansol.moviego.image.service.ImageService;
-import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
+import com.hwansol.moviego.movieschedule.dto.MovieScheduleListGetDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
@@ -112,7 +112,7 @@ public class ScreenService {
                                         .thenComparing(SeatSimpleGetDto.Response::getSeatNum))
                         .toList();
 
-        List<MovieScheduleGetDto.Response> movieScheduleResponseList =
+        List<MovieScheduleListGetDto.Response> movieScheduleResponseList =
                 screen.getMovieSchedules() == null ? new ArrayList<>() :
                 screen.getMovieSchedules().stream()
                         .map(ms -> {
@@ -120,10 +120,10 @@ public class ScreenService {
                             List<ImageGetDto.Response> imageResponse = imageService.getImageList(
                                     imageList);
 
-                            return MovieScheduleGetDto.Response.from(ms, imageResponse);
+                            return MovieScheduleListGetDto.Response.from(ms, imageResponse);
                         })
                         .sorted(Comparator.comparing(
-                                MovieScheduleGetDto.Response::getStartDateTime))
+                                MovieScheduleListGetDto.Response::getStartDateTime))
                         .toList();
 
         return ScreenGetDto.Response.from(screen, seatList, movieScheduleResponseList);
