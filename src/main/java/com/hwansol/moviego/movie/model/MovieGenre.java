@@ -31,6 +31,18 @@ public class MovieGenre extends BaseTImeEntity {
     @JoinColumn(name = "genre_id", nullable = false)
     private Genre genre;
 
+    public static MovieGenre create(Movie movie, Genre genre) {
+        if (movie == null || genre == null) {
+            throw new IllegalArgumentException("MovieGenre 생성 실패");
+        }
+
+        MovieGenre movieGenre = new MovieGenre();
+        movieGenre.relatedGenre(genre);
+        movieGenre.relatedMovie(movie);
+
+        return movieGenre;
+    }
+
     public void relatedMovie(Movie movie) {
         if (movie == null) {
             throw new IllegalArgumentException("연관관계 연결 실패");
