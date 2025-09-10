@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MovieScheduleService {
 
-    private final String STRING_FOR_HARD_DELETE = "영구 삭제";
+    private final static String STRING_FOR_HARD_DELETE = "영구 삭제";
 
     private final MovieScheduleRepository movieScheduleRepository;
     private final ScreenRepository screenRepository;
