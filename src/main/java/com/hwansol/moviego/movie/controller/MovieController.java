@@ -1,10 +1,14 @@
 package com.hwansol.moviego.movie.controller;
 
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.common.dto.PageListResponseDto;
+import com.hwansol.moviego.movie.dto.MovieCreateDto;
 import com.hwansol.moviego.movie.dto.MovieGetDto;
 import com.hwansol.moviego.movie.dto.MovieSimpleGetDto;
 import com.hwansol.moviego.movie.model.Movie;
 import com.hwansol.moviego.movie.service.MovieService;
+import com.hwansol.moviego.validation.IsImage;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
@@ -12,12 +16,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -65,5 +74,24 @@ public class MovieController {
         PageListResponseDto<MovieSimpleGetDto.Response> response = PageListResponseDto.from(responseList);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 영화 생성 컨트롤러
+     * 관리자만 생성 가능
+     *
+     * @param imageList 포스터 이미지 리스트, 첫 번째 인덱스 포스터가 메인 포스터
+     * @param request   영화 생성을 위한 정보를 담고 있는 request dto
+     * @return 성공 시 201 코드와 생성된 영화 엔티티의 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/movie")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> createMovieController(
+            @RequestPart List<@IsImage MultipartFile> imageList,
+            @Valid @RequestPart MovieCreateDto.Request request) {
+        CommonDto.Response response = movieService.createMovie(request, imageList);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 }
