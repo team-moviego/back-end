@@ -69,9 +69,8 @@ public class MovieController {
             @NotEmpty(message = "정렬 enum값은 빈 문자열일 수 없습니다.") @RequestParam(required = false)
             String orderTypeString, @PageableDefault Pageable pageable) {
         Page<Movie> movieList = movieService.getMovieList(word, genreName, orderTypeString, pageable);
-        List<MovieSimpleGetDto.Response> responseList = movieList.stream()
-                .map(MovieSimpleGetDto.Response::from)
-                .toList();
+        Page<MovieSimpleGetDto.Response> responseList = movieList
+                .map(MovieSimpleGetDto.Response::from);
 
         PageListResponseDto<MovieSimpleGetDto.Response> response = PageListResponseDto.from(responseList);
 
