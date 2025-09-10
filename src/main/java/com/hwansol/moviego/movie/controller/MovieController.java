@@ -20,7 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -93,5 +95,21 @@ public class MovieController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 영화 소프트 삭제 컨트롤러
+     * 관리자만 삭제 가능
+     *
+     * @param movieId 삭제할 영화 엔티티의 pk
+     * @return 성공 시 200 코드와 삭제된 영화 엔티티의 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
+     */
+    @DeleteMapping("/movie/{movieId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonDto.Response> deleteMovieController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long movieId) {
+        CommonDto.Response response = movieService.deleteMovie(movieId);
+
+        return ResponseEntity.ok(response);
     }
 }
