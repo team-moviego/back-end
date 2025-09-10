@@ -1,8 +1,9 @@
 package com.hwansol.moviego.screen.service;
 
 import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
 import com.hwansol.moviego.common.exception.DuplicatedException;
-import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.service.ImageService;
 import com.hwansol.moviego.movieschedule.dto.MovieScheduleSimpleGetDto;
@@ -93,7 +94,7 @@ public class ScreenService {
                 .orElseThrow(NotFoundException::new);
 
         if (!request.getDeleteString().equals(screen.getName())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         screenRepository.delete(screen);

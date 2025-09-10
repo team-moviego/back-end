@@ -6,8 +6,9 @@ import com.hwansol.moviego.actor.dto.ActorUpdateNameDto;
 import com.hwansol.moviego.actor.model.Actor;
 import com.hwansol.moviego.actor.repository.ActorRepository;
 import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
 import com.hwansol.moviego.common.exception.DuplicatedException;
-import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -92,7 +93,7 @@ public class ActorService {
                 .orElseThrow(NotFoundException::new);
 
         if (!actor.getName().equals(request.getDeleteString())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         actorRepository.delete(actor);

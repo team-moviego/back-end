@@ -1,8 +1,8 @@
 package com.hwansol.moviego.movieschedule.service;
 
 import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
 import com.hwansol.moviego.common.exception.ErrorCode;
-import com.hwansol.moviego.common.exception.HardDeleteException;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.image.model.Image;
@@ -181,7 +181,7 @@ public class MovieScheduleService {
         // todo: 예약자가 존재하는지 확인 필요
 
         if (!request.getDeleteString().equals(STRING_FOR_HARD_DELETE)) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         movieScheduleRepository.delete(movieSchedule);

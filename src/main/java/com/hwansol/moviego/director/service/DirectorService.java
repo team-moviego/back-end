@@ -1,8 +1,9 @@
 package com.hwansol.moviego.director.service;
 
 import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
 import com.hwansol.moviego.common.exception.DuplicatedException;
-import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
@@ -64,7 +65,7 @@ public class DirectorService {
      */
     @Transactional
     public CommonDto.Response updateDirectorName(Long directorId,
-            DirectorUpdateNameDto.Request request) {
+                                                 DirectorUpdateNameDto.Request request) {
         Director director = directorRepository.findById(directorId)
                 .orElseThrow(NotFoundException::new);
 
@@ -93,7 +94,7 @@ public class DirectorService {
                 .orElseThrow(NotFoundException::new);
 
         if (!director.getName().equals(request.getDeleteString())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         directorRepository.delete(director);

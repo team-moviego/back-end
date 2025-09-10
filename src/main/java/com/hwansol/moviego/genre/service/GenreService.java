@@ -1,8 +1,9 @@
 package com.hwansol.moviego.genre.service;
 
 import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
 import com.hwansol.moviego.common.exception.DuplicatedException;
-import com.hwansol.moviego.common.exception.HardDeleteException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
@@ -88,7 +89,7 @@ public class GenreService {
                 .orElseThrow(NotFoundException::new);
 
         if (request.getDeleteString().equals(genre.getName())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         genreRepository.delete(genre);
