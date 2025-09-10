@@ -4,7 +4,9 @@ import com.hwansol.moviego.actor.model.Actor;
 import com.hwansol.moviego.actor.repository.ActorRepository;
 import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.common.exception.AlreadyDeletedException;
+import com.hwansol.moviego.common.exception.DeleteException;
 import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.director.model.Director;
 import com.hwansol.moviego.director.repository.DirectorRepository;
@@ -21,6 +23,9 @@ import com.hwansol.moviego.movie.model.MovieDirector;
 import com.hwansol.moviego.movie.model.MovieGenre;
 import com.hwansol.moviego.movie.model.OrderType;
 import com.hwansol.moviego.movie.repository.MovieRepository;
+import com.hwansol.moviego.movieschedule.model.MovieSchedule;
+import com.hwansol.moviego.movieschedule.repository.MovieScheduleRepository;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +44,7 @@ public class MovieService {
     private final ActorRepository actorRepository;
     private final DirectorRepository directorRepository;
     private final GenreRepository genreRepository;
+    private final MovieScheduleRepository movieScheduleRepository;
     private final ImageService imageService;
 
     /**
@@ -153,19 +159,31 @@ public class MovieService {
     }
 
     /**
-     * 영화 삭제 서비스
+     * 영화 소프트 삭제 서비스
      *
-     * @param id - 삭제할 영화 pk
+     * @param movieId - 삭제할 영화 pk
      */
     @Transactional
-    public void deleteMovie(Long id) {
-        Movie movie = movieRepository.findById(id)
+    public CommonDto.Response deleteMovie(Long movieId) {
+        Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(NotFoundException::new);
 
         if (movie.getDeletedAt() != null) {
             throw new AlreadyDeletedException();
         }
 
+        LocalDateTime now = LocalDateTime.now();
+        List<MovieSchedule> movieSchedules = movieScheduleRepository.findAllByMovie_Id(movie.getId());
+        List<MovieSchedule> willShowingMovieSchedules = movieSchedules.stream()
+                .filter(ms -> !ms.getStartDateTime().isBefore(now))
+                .toList();
+
+        if (!willShowingMovieSchedules.isEmpty()) {
+            throw new DeleteException(ErrorCode.FAIL_DELETE_BY_EXIST_MOVIE_SCHEDULE);
+        }
+
         movie.softDelete();
+
+        return CommonDto.Response.from(movie.getId());
     }
 }
