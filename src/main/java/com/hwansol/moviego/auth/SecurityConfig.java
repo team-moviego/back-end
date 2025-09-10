@@ -44,7 +44,7 @@ public class SecurityConfig {
                 "/api/members/member/id",
                 "/api/members/member/pw",
                 "/api/genres",
-                "/api/movies/movie/{id}",
+                "/api/movies/movie",
                 "/api/movies",
                 "/api/movie-schedules/movie-schedule",
                 "/api/movie-schedules"
