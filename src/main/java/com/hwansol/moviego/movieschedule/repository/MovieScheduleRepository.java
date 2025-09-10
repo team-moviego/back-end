@@ -15,4 +15,6 @@ public interface MovieScheduleRepository extends JpaRepository<MovieSchedule, Lo
            "from MovieSchedule ms " +
            "where ms.id in :ids")
     void bulkDeleteByIds(List<Long> ids);
+
+    List<MovieSchedule> findAllByMovie_Id(Long movieId);
 }
