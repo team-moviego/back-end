@@ -67,7 +67,7 @@ public class MovieScheduleService {
      * @param screenId 상영관 pk, 상영관의 영화스케줄을 조회하고 하는 경우에만 사용함
      * @return 조회된 전체 영화 스케줄의 간단 정보를 담고 있는 response dto 리스트, 없을 경우 empty list
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<MovieScheduleSimpleGetDto.Response> getMovieScheduleList(Long screenId) {
         List<MovieSchedule> movieScheduleList = movieScheduleRepository.findAll();
 
@@ -79,15 +79,25 @@ public class MovieScheduleService {
         }
 
         List<MovieScheduleSimpleGetDto.Response> movieScheduleListResult = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
 
         if (movieScheduleList != null && !movieScheduleList.isEmpty()) {
             movieScheduleListResult = movieScheduleList.stream()
+                    .filter(m -> !m.getStartDateTime().isBefore(now))
                     .map(MovieScheduleSimpleGetDto.Response::from)
                     .sorted(Comparator.comparing(
                                     MovieScheduleSimpleGetDto.Response::getScreenName)
                             .thenComparing(
                                     MovieScheduleSimpleGetDto.Response::getStartDateTime))
                     .toList();
+
+            List<Long> pastEndedMovieScheduleIds = movieScheduleList.stream()
+                    .filter(m -> m.getEndDateTime().isBefore(now))
+                    .map(MovieSchedule::getId)
+                    .toList();
+
+            // 이미 상영이 종료된 영화 스케줄 영구 삭제
+            movieScheduleRepository.bulkDeleteByIds(pastEndedMovieScheduleIds);
         }
 
         return movieScheduleListResult;
