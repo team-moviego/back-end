@@ -1,9 +1,10 @@
 package com.hwansol.moviego.genre.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.ErrorCode;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
 import com.hwansol.moviego.genre.model.Genre;
@@ -54,9 +55,9 @@ public class GenreService {
     /**
      * 장르명 변경 서비스
      *
-     * @param genreId 변경할 장르의 pk
-     * @param request 변경할 장르명을 담고있는 request dto
-     * @return 변경된 장르 엔티티
+     * @param genreId 변경할 장르 pk
+     * @param request 변경할 장르명 정보를 담고 있는 request dto
+     * @return 장르명이 변경된 엔티티
      */
     @Transactional
     public Genre updateGenreName(Long genreId, GenreUpdateNameDto.Request request) {
@@ -88,7 +89,7 @@ public class GenreService {
                 .orElseThrow(NotFoundException::new);
 
         if (request.getDeleteString().equals(genre.getName())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         genreRepository.delete(genre);

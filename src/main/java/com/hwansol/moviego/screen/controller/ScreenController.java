@@ -1,6 +1,6 @@
 package com.hwansol.moviego.screen.controller;
 
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;

@@ -1,6 +1,6 @@
 package com.hwansol.moviego.director.controller;
 
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.director.dto.DirectorCreateDto;
 import com.hwansol.moviego.director.dto.DirectorSimpleGetDto;
 import com.hwansol.moviego.director.dto.DirectorUpdateNameDto;
@@ -52,7 +52,7 @@ public class DirectorController {
     @PostMapping("/director")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonDto.Response> createDirectorController(@Valid @RequestBody
-                                                                       DirectorCreateDto.Request request) {
+    DirectorCreateDto.Request request) {
         CommonDto.Response response = directorService.createDirector(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -61,14 +61,18 @@ public class DirectorController {
 
     /**
      * 감독명 변경 컨트롤러
+     * 관리자만 변경 가능
      *
-     * @param directorId 감독명을 변경할 감독 엔티티의 pk
-     * @param request    변경할 감독명의 정보를 가지고 있는 request dto
-     * @return 성공 시 200 코드와 감독명이 변경된 엔티티의 pk를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
+     * @param directorId 감독명을 변경할 엔티티의 pk
+     * @param request    변경할 감독명 정보를 담고 있는 request dto
+     * @return 성공 시 200 코드와 감독명이 변경된 엔티티의 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
      */
     @PatchMapping("/director/{directorId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto.Response> updateDirectorNameController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId, @Valid @RequestBody DirectorUpdateNameDto.Request request) {
+    public ResponseEntity<CommonDto.Response> updateDirectorNameController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId,
+            @Valid @RequestBody
+            DirectorUpdateNameDto.Request request) {
         CommonDto.Response response = directorService.updateDirectorName(directorId, request);
 
         return ResponseEntity.ok(response);
@@ -83,7 +87,9 @@ public class DirectorController {
      */
     @DeleteMapping("/director/{directorId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto.Response> deleteDirectorController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId, @Valid @RequestBody CommonDto.DeleteRequest request) {
+    public ResponseEntity<CommonDto.Response> deleteDirectorController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long directorId,
+            @Valid @RequestBody CommonDto.DeleteRequest request) {
         CommonDto.Response response = directorService.deleteDirector(directorId, request);
 
         return ResponseEntity.ok(response);

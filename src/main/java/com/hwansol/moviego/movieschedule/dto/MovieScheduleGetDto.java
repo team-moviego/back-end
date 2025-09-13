@@ -4,9 +4,8 @@ import com.hwansol.moviego.image.dto.ImageGetDto;
 import com.hwansol.moviego.movie.dto.MovieGetDto;
 import com.hwansol.moviego.movieschedule.model.MovieSchedule;
 import com.hwansol.moviego.movieschedule.model.MovieScheduleSeat;
-import com.hwansol.moviego.movieschedule.model.SeatStatus;
+import com.hwansol.moviego.screen.dto.ScreenSimpleGetDto;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,14 +21,16 @@ public class MovieScheduleGetDto {
 
         private Long id;
         private MovieGetDto.Response movieInfo;
+        private ScreenSimpleGetDto.Response screenInfo;
         private LocalDateTime startDateTime;
         private LocalDateTime endDateTime;
-        private String screenName;
-        private int totalSeat;
-        private int availableSeat;
+        private List<MovieScheduleSeatSimpleGetDto.Response> seatInfoList;
 
-        public Response(Long id, MovieGetDto.Response movieInfo, LocalDateTime startDateTime, LocalDateTime endDateTime, String screenName, int totalSeat, int availableSeat) {
-            boolean isValidateDataFail = id == null || id <= 0 || movieInfo == null || startDateTime == null || endDateTime == null || screenName == null || screenName.isBlank() || totalSeat <= 0 || availableSeat < 0;
+        public Response(Long id, MovieGetDto.Response movieInfo,
+                ScreenSimpleGetDto.Response screenInfo,
+                LocalDateTime startDateTime, LocalDateTime endDateTime,
+                List<MovieScheduleSeatSimpleGetDto.Response> seatInfoList) {
+            boolean isValidateDataFail = id == null || id <= 0 || movieInfo == null || screenInfo == null || startDateTime == null || endDateTime == null || seatInfoList == null || seatInfoList.isEmpty();
 
             if (isValidateDataFail) {
                 throw new IllegalArgumentException("MovieScheduleGetDto.Response 생성 실패");
@@ -37,27 +38,26 @@ public class MovieScheduleGetDto {
 
             this.id = id;
             this.movieInfo = movieInfo;
+            this.screenInfo = screenInfo;
             this.startDateTime = startDateTime;
             this.endDateTime = endDateTime;
-            this.screenName = screenName;
-            this.totalSeat = totalSeat;
-            this.availableSeat = availableSeat;
+            this.seatInfoList = seatInfoList;
         }
 
-        public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule, List<ImageGetDto.Response> imageList) {
-            List<MovieScheduleSeat> availableSeats = movieSchedule.getMovieScheduleSeats() == null ? new ArrayList<>() :
-                    movieSchedule.getMovieScheduleSeats().stream()
-                            .filter(s -> s.getSeatStatus().equals(SeatStatus.AVAILABLE))
-                            .toList();
+        public static MovieScheduleGetDto.Response from(MovieSchedule movieSchedule,
+                List<ImageGetDto.Response> movieImageList) {
+            List<MovieScheduleSeat> movieScheduleSeats = movieSchedule.getMovieScheduleSeats();
+            List<MovieScheduleSeatSimpleGetDto.Response> movieScheduleSeatList = movieScheduleSeats.stream()
+                    .map(MovieScheduleSeatSimpleGetDto.Response::from)
+                    .toList();
 
-            return Response.builder()
+            return MovieScheduleGetDto.Response.builder()
                     .id(movieSchedule.getId())
-                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), imageList))
+                    .movieInfo(MovieGetDto.Response.from(movieSchedule.getMovie(), movieImageList))
+                    .screenInfo(ScreenSimpleGetDto.Response.from(movieSchedule.getScreen()))
                     .startDateTime(movieSchedule.getStartDateTime())
                     .endDateTime(movieSchedule.getEndDateTime())
-                    .screenName(movieSchedule.getScreen().getName())
-                    .totalSeat(movieSchedule.getMovieScheduleSeats().size())
-                    .availableSeat(availableSeats.size())
+                    .seatInfoList(movieScheduleSeatList)
                     .build();
         }
     }

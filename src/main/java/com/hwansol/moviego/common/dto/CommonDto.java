@@ -1,4 +1,4 @@
-package com.hwansol.moviego.common;
+package com.hwansol.moviego.common.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -20,7 +20,7 @@ public class CommonDto {
             if (deleteString == null || deleteString.isBlank()) {
                 throw new IllegalArgumentException("CommonDto.DeleteRequest 생성 실패");
             }
-            
+
             this.deleteString = deleteString;
         }
     }

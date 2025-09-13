@@ -1,13 +1,12 @@
 package com.hwansol.moviego.screen.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
-import com.hwansol.moviego.image.dto.ImageGetDto;
-import com.hwansol.moviego.image.model.Image;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.ErrorCode;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.image.service.ImageService;
-import com.hwansol.moviego.movieschedule.dto.MovieScheduleGetDto;
+import com.hwansol.moviego.movieschedule.dto.MovieScheduleSimpleGetDto;
 import com.hwansol.moviego.screen.dto.ScreenCreateDto;
 import com.hwansol.moviego.screen.dto.ScreenGetDto;
 import com.hwansol.moviego.screen.model.Screen;
@@ -95,7 +94,7 @@ public class ScreenService {
                 .orElseThrow(NotFoundException::new);
 
         if (!request.getDeleteString().equals(screen.getName())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         screenRepository.delete(screen);
@@ -109,21 +108,14 @@ public class ScreenService {
                 screen.getSeats() == null ? new ArrayList<>() : screen.getSeats().stream()
                         .map(SeatSimpleGetDto.Response::from)
                         .sorted(Comparator.comparing(SeatSimpleGetDto.Response::getSeatRow)
-                                        .thenComparing(SeatSimpleGetDto.Response::getSeatNum))
+                                .thenComparing(SeatSimpleGetDto.Response::getSeatNum))
                         .toList();
 
-        List<MovieScheduleGetDto.Response> movieScheduleResponseList =
+        List<MovieScheduleSimpleGetDto.Response> movieScheduleResponseList =
                 screen.getMovieSchedules() == null ? new ArrayList<>() :
                 screen.getMovieSchedules().stream()
-                        .map(ms -> {
-                            List<Image> imageList = ms.getMovie().getImages();
-                            List<ImageGetDto.Response> imageResponse = imageService.getImageList(
-                                    imageList);
-
-                            return MovieScheduleGetDto.Response.from(ms, imageResponse);
-                        })
-                        .sorted(Comparator.comparing(
-                                MovieScheduleGetDto.Response::getStartDateTime))
+                        .map(MovieScheduleSimpleGetDto.Response::from)
+                        .sorted(Comparator.comparing(MovieScheduleSimpleGetDto.Response::getStartDateTime))
                         .toList();
 
         return ScreenGetDto.Response.from(screen, seatList, movieScheduleResponseList);

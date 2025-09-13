@@ -1,9 +1,10 @@
 package com.hwansol.moviego.seat.service;
 
-import com.hwansol.moviego.common.CommonDto;
-import com.hwansol.moviego.common.DuplicatedException;
-import com.hwansol.moviego.common.HardDeleteException;
-import com.hwansol.moviego.common.NotFoundException;
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.ErrorCode;
+import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.screen.model.Screen;
 import com.hwansol.moviego.screen.repository.ScreenRepository;
 import com.hwansol.moviego.seat.dto.SeatCreateDto;
@@ -45,8 +46,8 @@ public class SeatService {
 
         return seatList.stream()
                 .sorted(Comparator.comparing((Seat s) -> s.getScreen().getName())
-                                .thenComparing(Seat::getSeatRow)
-                                .thenComparing(Seat::getSeatNum))
+                        .thenComparing(Seat::getSeatRow)
+                        .thenComparing(Seat::getSeatNum))
                 .toList();
     }
 
@@ -89,7 +90,7 @@ public class SeatService {
                 .orElseThrow(NotFoundException::new);
 
         if (!request.getDeleteString().equals(seat.getSeatRow() + seat.getSeatNum())) {
-            throw new HardDeleteException();
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
         }
 
         seatRepository.delete(seat);

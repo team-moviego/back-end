@@ -1,6 +1,5 @@
 package com.hwansol.moviego.genre.dto;
 
-import com.hwansol.moviego.genre.model.Genre;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,7 +13,7 @@ public class GenreUpdateNameDto {
     @Builder(toBuilder = true)
     public static class Request {
 
-        @NotBlank(message = "변경할 장르면을 입력해주세요.")
+        @NotBlank(message = "변경할 장르명을 입력해주세요.")
         private String newName;
 
         public Request(String newName) {
@@ -23,12 +22,6 @@ public class GenreUpdateNameDto {
             }
 
             this.newName = newName;
-        }
-
-        public Genre toEntity() {
-            return Genre.builder()
-                    .name(this.newName)
-                    .build();
         }
     }
 }

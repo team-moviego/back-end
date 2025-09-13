@@ -1,6 +1,6 @@
 package com.hwansol.moviego.genre.controller;
 
-import com.hwansol.moviego.common.CommonDto;
+import com.hwansol.moviego.common.dto.CommonDto;
 import com.hwansol.moviego.genre.dto.GenreCreateDto;
 import com.hwansol.moviego.genre.dto.GenreSimpleGetDto;
 import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
@@ -67,14 +67,18 @@ public class GenreController {
 
     /**
      * 장르명 변경 컨트롤러
+     * 관리자만 변경 가능
      *
-     * @param genreId 변경할 장르의 pk
-     * @param request 변경할 장르명이 담긴 request dto
-     * @return 성공 시 200 코드와 변경된 장르의 pk를 담은 response dto, 실패 시 에러코드와 에러메시지
+     * @param genreId 장르명을 변경할 장르 pk
+     * @param request 변경할 장르명 정보를 담고 있는 request dto
+     * @return 성공 시 200 코드와 장르명이 변경된 엔티티의 pk 정보를 담고 있는 response dto, 실패 시 에러코드와 에러메시지
      */
     @PatchMapping("/genre/{genreId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonDto.Response> updateGenreNameController(@Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId, @Valid @RequestBody GenreUpdateNameDto.Request request) {
+    public ResponseEntity<CommonDto.Response> updateGenreNameController(
+            @Positive(message = "pk는 0 또는 음수일 수 없습니다.") @PathVariable Long genreId,
+            @Valid @RequestBody
+            GenreUpdateNameDto.Request request) {
         Genre genre = genreService.updateGenreName(genreId, request);
         CommonDto.Response response = CommonDto.Response.from(genre.getId());
 

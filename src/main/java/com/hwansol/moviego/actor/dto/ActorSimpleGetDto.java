@@ -17,9 +17,9 @@ public class ActorSimpleGetDto {
         private String name;
 
         public Response(Long id, String name) {
-            boolean isValidatedDataFail = id == null || id <= 0 || name == null || name.isBlank();
+            boolean isValidateDataFail = id == null || id <= 0 || name == null || name.isBlank();
 
-            if (isValidatedDataFail) {
+            if (isValidateDataFail) {
                 throw new IllegalArgumentException("ActorSimpleGetDto.Response 생성 실패");
             }
 

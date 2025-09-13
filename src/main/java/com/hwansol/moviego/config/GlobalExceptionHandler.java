@@ -1,5 +1,6 @@
 package com.hwansol.moviego.config;
 
+import com.hwansol.moviego.common.exception.BusinessLogicException;
 import com.hwansol.moviego.mail.exception.MailException;
 import com.hwansol.moviego.member.exception.MemberException;
 import jakarta.validation.ConstraintViolation;
@@ -29,7 +30,9 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    private ResponseEntity<String> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+    private ResponseEntity<String> handleAuthorizationDeniedException(
+            AuthorizationDeniedException e
+    ) {
         log.error("403 Forbidden");
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -48,7 +51,8 @@ public class GlobalExceptionHandler {
     // 405 에러 핸들러
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     private ResponseEntity<String> handleNotSupportedException(
-            HttpRequestMethodNotSupportedException e) {
+            HttpRequestMethodNotSupportedException e
+    ) {
 
         log.error("405 NotSupported", e);
 
@@ -60,7 +64,8 @@ public class GlobalExceptionHandler {
     // 유효성 검증 에러 핸들러(requestBody) -> 400 에러
     @ExceptionHandler(MethodArgumentNotValidException.class)
     private ResponseEntity<List<String>> handleValidException(
-            MethodArgumentNotValidException e) {
+            MethodArgumentNotValidException e
+    ) {
 
         log.error("request 유효성 검사 실패", e);
 
@@ -77,7 +82,8 @@ public class GlobalExceptionHandler {
     // 유효성 검증 에러 핸들러(pathVariable, requestParam) -> 400 에러
     @ExceptionHandler(ConstraintViolationException.class)
     private ResponseEntity<List<String>> handleValidException2(
-            ConstraintViolationException e) {
+            ConstraintViolationException e
+    ) {
 
         log.error("pathVariable 또는 requestParam 유효성 검사 실패", e);
 
@@ -93,7 +99,8 @@ public class GlobalExceptionHandler {
     // 필수 PathVariable 값 존재하지 않을 경우 에러 핸들러
     @ExceptionHandler(MissingPathVariableException.class)
     private ResponseEntity<String> handleMissingPathVariableException(
-            MissingPathVariableException e) {
+            MissingPathVariableException e
+    ) {
 
         log.error("필수 PathVariable 값 존재하지 않음", e);
 
@@ -104,7 +111,8 @@ public class GlobalExceptionHandler {
     // 필수 RequestPart 값 존재하지 않을 경우 에러 핸들러
     @ExceptionHandler(MissingServletRequestPartException.class)
     private ResponseEntity<String> handleMissingServletRequestPartException(
-            MissingServletRequestPartException e) {
+            MissingServletRequestPartException e
+    ) {
 
         log.error("필수 RequestPart 값 존재하지 않음", e);
 
@@ -115,7 +123,8 @@ public class GlobalExceptionHandler {
     // 필수 RequestParam 값 존재하지 않을 경우 에러 핸들러
     @ExceptionHandler(MissingServletRequestParameterException.class)
     private ResponseEntity<String> handleMissingServletRequestParameterException(
-            MissingServletRequestParameterException e) {
+            MissingServletRequestParameterException e
+    ) {
 
         log.error("필수 RequestParam 값 존재하지 않은", e);
 
@@ -126,7 +135,8 @@ public class GlobalExceptionHandler {
     // unique 제약 조건 위반 exception 핸들러
     @ExceptionHandler(DataIntegrityViolationException.class)
     private ResponseEntity<String> handleDataIntegrityViolationException(
-            DataIntegrityViolationException e) {
+            DataIntegrityViolationException e
+    ) {
 
         log.error("unique 제약 조건 위반", e);
 
@@ -136,12 +146,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     private ResponseEntity<String> handleHandlerMethodValidationException(
-            HandlerMethodValidationException e) {
+            HandlerMethodValidationException e
+    ) {
 
         log.error("parameter 유효성 검증 실패", e);
 
         return ResponseEntity.badRequest()
                 .body("올바른 parameter 값이 아닙니다.");
+    }
+
+    @ExceptionHandler(BusinessLogicException.class)
+    private ResponseEntity<String> handleBusinessLogicException(BusinessLogicException e) {
+        log.error("서비스 로직 에러 발생", e);
+
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(e.getMessage());
     }
 
     @ExceptionHandler(MemberException.class)

@@ -1,6 +1,6 @@
 package com.hwansol.moviego.actor.dto;
 
-import com.hwansol.moviego.actor.model.Actor;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +13,7 @@ public class ActorUpdateNameDto {
     @Builder(toBuilder = true)
     public static class Request {
 
+        @NotBlank(message = "변경할 배우명을 입력해주세요.")
         private String newName;
 
         public Request(String newName) {
@@ -21,12 +22,6 @@ public class ActorUpdateNameDto {
             }
 
             this.newName = newName;
-        }
-
-        public Actor toEntity() {
-            return Actor.builder()
-                    .name(this.newName)
-                    .build();
         }
     }
 }

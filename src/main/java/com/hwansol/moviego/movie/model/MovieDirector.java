@@ -31,6 +31,18 @@ public class MovieDirector extends BaseTImeEntity {
     @JoinColumn(name = "director_id", nullable = false)
     private Director director;
 
+    public static MovieDirector create(Movie movie, Director director) {
+        if (movie == null || director == null) {
+            throw new IllegalArgumentException("MovieDirector 생성 실패");
+        }
+
+        MovieDirector movieDirector = new MovieDirector();
+        movieDirector.relatedDirector(director);
+        movieDirector.relatedMovie(movie);
+
+        return movieDirector;
+    }
+
     public void relatedMovie(Movie movie) {
         if (movie == null) {
             throw new IllegalArgumentException("연관관계 연결 실패");

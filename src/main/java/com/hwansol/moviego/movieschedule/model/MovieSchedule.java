@@ -20,12 +20,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("deleted_at IS NULL")
 public class MovieSchedule extends BaseTImeEntity {
 
     @Id
@@ -49,13 +47,11 @@ public class MovieSchedule extends BaseTImeEntity {
     @OneToMany(mappedBy = "movieSchedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovieScheduleSeat> movieScheduleSeats;
 
-    @Column
-    private LocalDateTime deletedAt;
-
     @Builder
-    public MovieSchedule(LocalDateTime startDateTime, LocalDateTime endDateTime, Movie movie, Screen screen, List<MovieScheduleSeat> movieScheduleSeats, LocalDateTime deletedAt) {
+    public MovieSchedule(LocalDateTime startDateTime, LocalDateTime endDateTime) {
         LocalDateTime now = LocalDateTime.now();
-        boolean isValidateDataFail = startDateTime == null || startDateTime.isBefore(now) || endDateTime == null || endDateTime.isBefore(startDateTime);
+        boolean isValidateDataFail = startDateTime == null || startDateTime.isBefore(
+                now) || endDateTime == null || endDateTime.isBefore(startDateTime);
 
         if (isValidateDataFail) {
             throw new IllegalArgumentException("MovieSchedule 엔티티 생성 실패");
@@ -63,10 +59,6 @@ public class MovieSchedule extends BaseTImeEntity {
 
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.movie = movie;
-        this.screen = screen;
-        this.movieScheduleSeats = movieScheduleSeats;
-        this.deletedAt = deletedAt;
     }
 
     public void relatedMovie(Movie movie) {
@@ -98,10 +90,12 @@ public class MovieSchedule extends BaseTImeEntity {
             throw new IllegalArgumentException("연관관계 추가 실패");
         }
 
-        this.movieScheduleSeats = this.movieScheduleSeats == null ? new ArrayList<>() : this.movieScheduleSeats;
+        this.movieScheduleSeats =
+                this.movieScheduleSeats == null ? new ArrayList<>() : this.movieScheduleSeats;
 
         boolean isDuplicated = this.movieScheduleSeats.stream()
-                .anyMatch(m -> m.getSeat().getSeatNum() == movieScheduleSeat.getSeat().getSeatNum());
+                .anyMatch(
+                        m -> m.getSeat().getSeatNum() == movieScheduleSeat.getSeat().getSeatNum());
 
         if (isDuplicated) {
             throw new IllegalArgumentException("이미 연결된 연관관계 입니다.");

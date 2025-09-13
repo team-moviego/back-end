@@ -1,6 +1,5 @@
 package com.hwansol.moviego.director.dto;
 
-import com.hwansol.moviego.director.model.Director;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,16 +18,10 @@ public class DirectorUpdateNameDto {
 
         public Request(String newName) {
             if (newName == null || newName.isBlank()) {
-                throw new IllegalArgumentException("DirectorUpdateName.Request 생성 실패");
+                throw new IllegalArgumentException("DirectorUpdateNameDto.Request 생성 실패");
             }
 
             this.newName = newName;
-        }
-
-        public Director toEntity() {
-            return Director.builder()
-                    .name(this.newName)
-                    .build();
         }
     }
 }

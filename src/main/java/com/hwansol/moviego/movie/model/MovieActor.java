@@ -31,6 +31,18 @@ public class MovieActor extends BaseTImeEntity {
     @JoinColumn(name = "actor_id", nullable = false)
     private Actor actor;
 
+    public static MovieActor create(Movie movie, Actor actor) {
+        if (movie == null || actor == null) {
+            throw new IllegalArgumentException("MovieActor 생성 실패");
+        }
+
+        MovieActor movieActor = new MovieActor();
+        movieActor.relatedActor(actor);
+        movieActor.relatedMovie(movie);
+
+        return movieActor;
+    }
+
     public void relatedMovie(Movie movie) {
         if (movie == null) {
             throw new IllegalArgumentException("연관관계 연결 실패");
