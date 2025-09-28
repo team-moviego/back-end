@@ -1,7 +1,7 @@
 package com.hwansol.moviego.member.service;
 
 import com.hwansol.moviego.auth.TokenProvider;
-import com.hwansol.moviego.common.AlreadyDeletedException;
+import com.hwansol.moviego.common.exception.AlreadyDeletedException;
 import com.hwansol.moviego.mail.service.MailService;
 import com.hwansol.moviego.member.dto.MemberAuthCheckDto;
 import com.hwansol.moviego.member.dto.MemberAuthMailDto;
