@@ -21,7 +21,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(toBuilder = true)
-@SQLRestriction("del_date IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 public class Member extends BaseTImeEntity {
 
     @Id
@@ -46,7 +46,7 @@ public class Member extends BaseTImeEntity {
     private OAuthProvider oAuthProvider; // 소셜 로그인 사용자 구분
 
     @Column
-    private LocalDateTime delDate; // 삭제날짜
+    private LocalDateTime deletedAt; // 삭제날짜
 
 
 }

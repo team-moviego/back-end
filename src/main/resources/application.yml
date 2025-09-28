@@ -11,20 +11,28 @@ spring:
     resources:
       add-mappings: false
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DATABASE_HOST}:3306/moviego?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PW}
-
-
   jpa:
-    open-in-view: true
+    database-platform: H2
     hibernate:
       ddl-auto: create
-    show-sql: true
+    database: h2
     properties:
-      hibernate.format_sql: true
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        show_sql: true
+        format_sql: true
+        highlight_sql: true
+        default_batch_fetch_size: 100
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    username: ${DB_USER_NAME} # 환경 변수
+    password: ${DB_PWD} # 환경 변수
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
 
   # mail
   mail:
@@ -56,6 +64,10 @@ spring:
   # jwt
   jwt:
     secret: ${JWT_SECRET}
+    access:
+      expire: 900000
+    refresh:
+      expire: 86400000
 
   security:
     oauth2:
@@ -77,6 +89,20 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+  # multipart
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+r2:
+  bucketName: ${R2_BUCKET_NAME}
+  endpointUrl: ${R2_ENDPOINT_URL}
+  region: APAC
+  accessKey: ${R2_ACCESS_KEY}
+  secretKey: ${R2_SECRET_KEY}
 
 logging:
   level:

@@ -1,7 +1,7 @@
 package com.hwansol.moviego.member.controller;
 
-import com.hwansol.moviego.member.dto.MemberAuthDto;
-import com.hwansol.moviego.member.dto.MemberAuthEmailDto;
+import com.hwansol.moviego.member.dto.MemberAuthCheckDto;
+import com.hwansol.moviego.member.dto.MemberAuthMailDto;
 import com.hwansol.moviego.member.dto.MemberDeleteDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto;
 import com.hwansol.moviego.member.dto.MemberFindIdDto.Response;
@@ -21,7 +21,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -104,48 +103,45 @@ public class MemberController {
     }
 
     /**
+     * 인증번호 이메일 발송 컨트롤러
+     *
+     * @param request MemberAuthMailDto.Request
+     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/member/auth")
+    public ResponseEntity<String> sendAuthMailController(@Valid @RequestBody MemberAuthMailDto.Request request) {
+        memberService.sendAuthNum(request);
+
+        return ResponseEntity.ok("인증번호 이메일을 발송하였습니다.");
+    }
+
+    /**
+     * 인증번호 확인 컨트롤러
+     *
+     * @param request MemberAuthCheckDto.Request
+     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/member/auth-check")
+    public ResponseEntity<String> checkAuthController(@Valid @RequestBody MemberAuthCheckDto.Request request) {
+        memberService.checkAuthNum(request);
+
+        return ResponseEntity.ok("인증번호 인증이 완료되었습니다.");
+    }
+
+    /**
      * 회원 조회 컨트롤러
      *
      * @param principalDetails PrincipalDetails
      * @return 성공 시 200 코드와 응답 json, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/member")
-    public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal
-                                                                     PrincipalDetails principalDetails) {
+    public ResponseEntity<MemberGetDto.Response> getMemberController(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         String userId = principalDetails.getUsername();
 
         Member member = memberService.getMember(userId);
         MemberGetDto.Response response = MemberGetDto.Response.from(member);
 
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 인증번호 이메일 발송 컨트롤러
-     *
-     * @param request MemberAuthEmailDto.Request
-     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
-     */
-    @PostMapping("/member/auth")
-    public ResponseEntity<String> sendAuthNumController(
-            @RequestBody MemberAuthEmailDto.Request request) {
-        memberService.sendAuthNum(request);
-
-        return ResponseEntity.ok("인증번호가 전송되었습니다.");
-    }
-
-    /**
-     * 인증번호 확인 컨트롤러
-     *
-     * @param request MemberAuthDto.Request
-     * @return 성공 시 200 코드와 성공 메시지, 실패 시 에러코드와 에러메시지
-     */
-    @PostMapping("/member/auth-check")
-    public ResponseEntity<String> checkAuthNum(@Valid @RequestBody MemberAuthDto.Request request) {
-        memberService.checkAuthNum(request);
-
-        return ResponseEntity.ok("이메일 인증에 성공하셨습니다.");
     }
 
     /**
@@ -188,11 +184,11 @@ public class MemberController {
      * @param response HttpServletResponse
      * @return 성공 시 200 코드와 성공메시지, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @PostMapping("/member/signout")
-    public ResponseEntity<String> signOutController(HttpServletRequest request,
+    public ResponseEntity<String> signOutController(@AuthenticationPrincipal PrincipalDetails principalDetails, HttpServletRequest request,
                                                     HttpServletResponse response) {
-        memberService.signOut(request, response);
+        String userId = principalDetails.getUsername();
+        memberService.signOut(userId, request, response);
 
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
@@ -203,7 +199,6 @@ public class MemberController {
      * @param request MemberModifyEmailDto.Request
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @PatchMapping("/member/email")
     public ResponseEntity<MemberModifyEmailDto.Response> modifyEmailController(
             @Valid @RequestBody MemberModifyEmailDto.Request request) {
@@ -220,7 +215,6 @@ public class MemberController {
      * @param principalDetails PrincipalDetails
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러메시지
      */
-    @PreAuthorize("hasRole('USER')")
     @PatchMapping("/member/pw")
     public ResponseEntity<MemberModifyPwDto.Response> modifyPwController(
             @Valid @RequestBody MemberModifyPwDto.Request request,
@@ -240,7 +234,6 @@ public class MemberController {
      * @param servletResponse  HttpServletResponse
      * @return 성공 시 200 코드와 응답 JSON, 실패 시 에러코드와 에러케시지
      */
-    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/member")
     public ResponseEntity<MemberDeleteDto.Response> deleteMemberController(
             @AuthenticationPrincipal PrincipalDetails principalDetails,

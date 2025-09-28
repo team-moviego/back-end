@@ -1,0 +1,99 @@
+package com.hwansol.moviego.genre.service;
+
+import com.hwansol.moviego.common.dto.CommonDto;
+import com.hwansol.moviego.common.exception.DeleteException;
+import com.hwansol.moviego.common.exception.DuplicatedException;
+import com.hwansol.moviego.common.exception.ErrorCode;
+import com.hwansol.moviego.common.exception.NotFoundException;
+import com.hwansol.moviego.genre.dto.GenreCreateDto;
+import com.hwansol.moviego.genre.dto.GenreUpdateNameDto;
+import com.hwansol.moviego.genre.model.Genre;
+import com.hwansol.moviego.genre.repository.GenreRepository;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class GenreService {
+
+    private final GenreRepository genreRepository;
+
+    /**
+     * 전체 장르 리스트 조회
+     *
+     * @return 조회된 장르 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<Genre> getGenreList() {
+        return genreRepository.findAll();
+    }
+
+    /**
+     * 장르 생성
+     *
+     * @param request GenreCreateDto.Request
+     * @return 생성된 장르 엔티티
+     */
+    @Transactional
+    public Genre createGenre(GenreCreateDto.Request request) {
+        Genre genre = genreRepository.findByName(request.getName())
+                .orElse(null);
+
+        if (genre != null) {
+            throw new DuplicatedException();
+        }
+
+        Genre newGenre = request.toEntity();
+
+        return genreRepository.save(newGenre);
+    }
+
+    /**
+     * 장르명 변경 서비스
+     *
+     * @param genreId 변경할 장르 pk
+     * @param request 변경할 장르명 정보를 담고 있는 request dto
+     * @return 장르명이 변경된 엔티티
+     */
+    @Transactional
+    public Genre updateGenreName(Long genreId, GenreUpdateNameDto.Request request) {
+        Genre genre = genreRepository.findById(genreId)
+                .orElseThrow(NotFoundException::new);
+
+        Genre existedGenre = genreRepository.findByName(request.getNewName())
+                .orElse(null);
+
+        if (existedGenre != null) {
+            throw new DuplicatedException();
+        }
+
+        genre.updateName(request.getNewName());
+
+        return genre;
+    }
+
+    /**
+     * 장르 하드 삭제
+     *
+     * @param genreId 삭제할 장르 pk
+     * @param request CommonDto.DeleteRequest
+     * @return 삭제된 장르 엔티티
+     */
+    @Transactional
+    public Genre deleteGenre(Long genreId, CommonDto.DeleteRequest request) {
+        Genre genre = genreRepository.findById(genreId)
+                .orElseThrow(NotFoundException::new);
+
+        if (request.getDeleteString().equals(genre.getName())) {
+            throw new DeleteException(ErrorCode.HARD_DELETE_FAIL);
+        }
+
+        genreRepository.delete(genre);
+
+        return genre;
+    }
+}
