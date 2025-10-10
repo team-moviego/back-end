@@ -37,11 +37,11 @@ public class MovieSchedule extends BaseTImeEntity {
     private LocalDateTime endDateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "movie_id")
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "screen_id")
+    @JoinColumn(name = "screen_id", nullable = false)
     private Screen screen;
 
     @OneToMany(mappedBy = "movieSchedule", cascade = CascadeType.ALL, orphanRemoval = true)
