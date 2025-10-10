@@ -51,6 +51,6 @@ public class ReservationService {
         int value = now.getMonth().getValue();
         int dayOfMonth = now.getDayOfMonth();
 
-        return year + String.format("%2s", value).replace(" ", "0") + String.format("%2s", dayOfMonth).replace(" ", "0") + randomNum;
+        return year + String.format("%2s", value).replace(" ", "0") + String.format("%2s", dayOfMonth).replace(" ", "0") + String.format("%6s", randomNum).replace(" ", "0");
     }
 }
