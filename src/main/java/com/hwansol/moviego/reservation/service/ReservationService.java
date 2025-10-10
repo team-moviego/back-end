@@ -1,5 +1,7 @@
 package com.hwansol.moviego.reservation.service;
 
+import com.hwansol.moviego.common.exception.AuthException;
+import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
 import com.hwansol.moviego.reservation.model.Reservation;
 import com.hwansol.moviego.reservation.repository.ReservationRepository;
@@ -24,9 +26,16 @@ public class ReservationService {
      * @return 조회된 예약 엔티티
      */
     @Transactional(readOnly = true)
-    public Reservation getReservation(Long reservationId) {
-        return reservationRepository.findById(reservationId)
+    public Reservation getReservation(Long reservationId, String memberId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(NotFoundException::new);
+        String userId = reservation.getMember().getUserId();
+
+        if (!memberId.equals(userId)) {
+            throw new AuthException(ErrorCode.FORBIDDEN);
+        }
+
+        return reservation;
     }
 
     // 예약 번호 생성 메서드
