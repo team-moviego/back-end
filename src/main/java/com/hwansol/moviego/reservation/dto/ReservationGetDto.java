@@ -57,7 +57,7 @@ public class ReservationGetDto {
             this.createdAt = createdAt;
         }
 
-        public ReservationGetDto.Response from(Reservation reservation) {
+        public static ReservationGetDto.Response from(Reservation reservation) {
             if (reservation == null) {
                 throw new IllegalArgumentException("ReservationGetDto.Response 생성 실패");
             }
@@ -120,7 +120,7 @@ public class ReservationGetDto {
             this.createdAt = createdAt;
         }
 
-        public ReservationGetDto.SimpleResponse from(Reservation reservation) {
+        public static ReservationGetDto.SimpleResponse from(Reservation reservation) {
             if (reservation == null) {
                 throw new IllegalArgumentException("ReservationGetDto.SimpleResponse 생성 실패");
             }
