@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ReservationService {
 
+    private static int RESERVATION_SEQUENCE = 0;
     private final ReservationRepository reservationRepository;
 
     /**
@@ -56,18 +57,21 @@ public class ReservationService {
     }
 
     // 예약 번호 생성 메서드
-    // 예: 날짜 + 6자리 시퀀스
-    // 20251010854940
+    // 예: 날짜 + 시간 + 2자리 시퀀스
+    // 2025101085494000
     private String createReservationNum() {
-        if (RESERVATION_SEQUENCE >= 1000000) {
+        if (RESERVATION_SEQUENCE >= 100) {
             RESERVATION_SEQUENCE = 0;
         }
 
-        LocalDate now = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
         int year = now.getYear();
         int month = now.getMonth().getValue();
         int dayOfMonth = now.getDayOfMonth();
+        int hour = now.getHour();
+        int minute = now.getMinute();
+        int second = now.getSecond();
 
-        return String.format("%d%02d%02d%06d", year, month, dayOfMonth, RESERVATION_SEQUENCE++);
+        return String.format("%d%02d%02d%02d%02d%02d%06d", year, month, dayOfMonth, hour, minute, second, RESERVATION_SEQUENCE++);
     }
 }
