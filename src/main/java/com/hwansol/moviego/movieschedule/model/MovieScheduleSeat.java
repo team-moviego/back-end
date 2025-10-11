@@ -71,4 +71,13 @@ public class MovieScheduleSeat {
 
         this.seat = seat;
     }
+
+    // 좌석 예약 처리
+    public void reserveSeat() {
+        if (this.seatStatus.equals(SeatStatus.UNAVAILABLE)) {
+            throw new IllegalStateException("이미 예약처리된 좌석입니다.");
+        }
+
+        this.seatStatus = SeatStatus.UNAVAILABLE;
+    }
 }
