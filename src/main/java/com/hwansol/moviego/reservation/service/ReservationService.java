@@ -56,17 +56,18 @@ public class ReservationService {
     }
 
     // 예약 번호 생성 메서드
-    // 예: 날짜 + 6자리 난수
+    // 예: 날짜 + 6자리 시퀀스
     // 20251010854940
     private String createReservationNum() {
-        Random random = new Random();
-        int randomNum = random.nextInt(1000000);
+        if (RESERVATION_SEQUENCE >= 1000000) {
+            RESERVATION_SEQUENCE = 0;
+        }
 
         LocalDate now = LocalDate.now();
         int year = now.getYear();
-        int value = now.getMonth().getValue();
+        int month = now.getMonth().getValue();
         int dayOfMonth = now.getDayOfMonth();
 
-        return year + String.format("%2s", value).replace(" ", "0") + String.format("%2s", dayOfMonth).replace(" ", "0") + String.format("%6s", randomNum).replace(" ", "0");
+        return String.format("%d%02d%02d%06d", year, month, dayOfMonth, RESERVATION_SEQUENCE++);
     }
 }
