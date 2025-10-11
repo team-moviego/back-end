@@ -14,4 +14,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
            "from Reservation r " +
            "where r.member.userId = :memberId")
     Page<Reservation> findAllWithMemberId(String memberId, Pageable pageable);
+
+    Reservation findByReservationNum(String reservationNum);
 }
