@@ -30,12 +30,8 @@ public class ReservationCreateDto {
         @NotNull(message = "좌석 정보를 입력해주세요.")
         private List<@NotNull(message = "좌석 pk를 입력해주세요.") @Positive(message = "pk는 0 또는 음수일 수 없습니다.") Long> movieScheduleSeatIds;
 
-        @NotNull(message = "영화 스케줄 pk를 입력해주세요.")
-        @Positive(message = "pk는 0 또는 음수일 수 없습니다.")
-        private Long movieScheduleId;
-
-        public Request(BigDecimal payment, PayType payType, List<Long> movieScheduleSeatIds, Long movieScheduleId) {
-            boolean isValidatedFail = payment == null || payment.compareTo(BigDecimal.ZERO) <= 0 || payType == null || movieScheduleSeatIds == null || movieScheduleSeatIds.isEmpty() || movieScheduleId == null || movieScheduleId <= 0;
+        public Request(BigDecimal payment, PayType payType, List<Long> movieScheduleSeatIds) {
+            boolean isValidatedFail = payment == null || payment.compareTo(BigDecimal.ZERO) <= 0 || payType == null || movieScheduleSeatIds == null || movieScheduleSeatIds.isEmpty();
 
             if (isValidatedFail) {
                 throw new IllegalArgumentException("ReservationCreateDto.Request 생성 실패");
@@ -44,7 +40,6 @@ public class ReservationCreateDto {
             this.payment = payment;
             this.payType = payType;
             this.movieScheduleSeatIds = movieScheduleSeatIds;
-            this.movieScheduleId = movieScheduleId;
         }
 
         public Reservation toEntity(String reservationNum) {
