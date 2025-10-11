@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @EnumCreator
 public enum ReservationType {
-    RESERVATION("결제"),
-    CANCEL("환불");
+    RESERVATION("예약"),
+    CANCEL("취소");
 
     private final String description;
 }
