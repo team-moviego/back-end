@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @EnumCreator
-public enum PayType {
-    PAY("결제"),
+public enum ReservationType {
+    RESERVATION("결제"),
     CANCEL("환불");
 
     private final String description;

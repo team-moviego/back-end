@@ -1,7 +1,7 @@
 package com.hwansol.moviego.reservation.dto;
 
-import com.hwansol.moviego.reservation.model.PayType;
 import com.hwansol.moviego.reservation.model.Reservation;
+import com.hwansol.moviego.reservation.model.ReservationType;
 import com.hwansol.moviego.validation.IsEnum;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -25,20 +25,20 @@ public class ReservationCreateDto {
 
         @NotNull(message = "결제 타입을 입력해주세요.")
         @IsEnum(message = "올바른 enum값을 입력해주세요.")
-        private PayType payType;
+        private ReservationType reservationType;
 
         @NotNull(message = "좌석 정보를 입력해주세요.")
         private List<@NotNull(message = "좌석 pk를 입력해주세요.") @Positive(message = "pk는 0 또는 음수일 수 없습니다.") Long> movieScheduleSeatIds;
 
-        public Request(BigDecimal payment, PayType payType, List<Long> movieScheduleSeatIds) {
-            boolean isValidatedFail = payment == null || payment.compareTo(BigDecimal.ZERO) <= 0 || payType == null || movieScheduleSeatIds == null || movieScheduleSeatIds.isEmpty();
+        public Request(BigDecimal payment, ReservationType reservationType, List<Long> movieScheduleSeatIds) {
+            boolean isValidatedFail = payment == null || payment.compareTo(BigDecimal.ZERO) <= 0 || reservationType == null || movieScheduleSeatIds == null || movieScheduleSeatIds.isEmpty();
 
             if (isValidatedFail) {
                 throw new IllegalArgumentException("ReservationCreateDto.Request 생성 실패");
             }
 
             this.payment = payment;
-            this.payType = payType;
+            this.reservationType = reservationType;
             this.movieScheduleSeatIds = movieScheduleSeatIds;
         }
 
@@ -46,7 +46,7 @@ public class ReservationCreateDto {
             return Reservation.builder()
                     .reservationNum(reservationNum)
                     .payment(this.payment)
-                    .payType(this.payType)
+                    .payType(this.reservationType)
                     .build();
         }
     }

@@ -43,7 +43,7 @@ public class Reservation extends BaseTImeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PayType payType;
+    private ReservationType reservationType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_schedule_id", nullable = false)
@@ -60,15 +60,15 @@ public class Reservation extends BaseTImeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Reservation(String reservationNum, BigDecimal payment, PayType payType) {
-        boolean isValidateDataFail = reservationNum == null || reservationNum.isBlank() || payment == null || payment.compareTo(BigDecimal.ZERO) <= 0 || payType == null;
+    public Reservation(String reservationNum, BigDecimal payment, ReservationType reservationType) {
+        boolean isValidateDataFail = reservationNum == null || reservationNum.isBlank() || payment == null || payment.compareTo(BigDecimal.ZERO) <= 0 || reservationType == null;
         if (isValidateDataFail) {
             throw new IllegalArgumentException("Reservation 엔티티 생성 실패");
         }
 
         this.reservationNum = reservationNum;
         this.payment = payment;
-        this.payType = payType;
+        this.reservationType = reservationType;
     }
 
     public void relatedMovieSchedule(MovieSchedule movieSchedule) {
