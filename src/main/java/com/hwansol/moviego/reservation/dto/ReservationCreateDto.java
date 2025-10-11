@@ -46,7 +46,7 @@ public class ReservationCreateDto {
             return Reservation.builder()
                     .reservationNum(reservationNum)
                     .payment(this.payment)
-                    .payType(this.reservationType)
+                    .reservationType(ReservationType.RESERVATION)
                     .build();
         }
     }
