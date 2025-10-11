@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +26,7 @@ public class ReservationService {
      * 예약 상세 조회 서비스
      *
      * @param reservationId 조회할 예약 pk
-     * @return 조회된 예약 엔티티
+     * @return 조회된 예약
      */
     @Transactional(readOnly = true)
     public ReservationGetDto.Response getReservation(Long reservationId, String memberId) {
@@ -37,6 +39,20 @@ public class ReservationService {
         }
 
         return ReservationGetDto.Response.from(reservation);
+    }
+
+    /**
+     * 회원의 예약 리스트 조회 서비스
+     *
+     * @param memberId 회원 아이디
+     * @param pageable 페이징 조건
+     * @return 회원의 예약 리스트
+     */
+    @Transactional(readOnly = true)
+    public Page<ReservationGetDto.SimpleResponse> getReservationList(String memberId, Pageable pageable) {
+        Page<Reservation> reservationList = reservationRepository.findAllWithMemberId(memberId, pageable);
+
+        return reservationList.map(ReservationGetDto.SimpleResponse::from);
     }
 
     // 예약 번호 생성 메서드
