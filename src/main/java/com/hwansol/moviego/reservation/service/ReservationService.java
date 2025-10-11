@@ -3,11 +3,20 @@ package com.hwansol.moviego.reservation.service;
 import com.hwansol.moviego.common.exception.AuthException;
 import com.hwansol.moviego.common.exception.ErrorCode;
 import com.hwansol.moviego.common.exception.NotFoundException;
+import com.hwansol.moviego.member.model.Member;
+import com.hwansol.moviego.member.repository.MemberRepository;
+import com.hwansol.moviego.movieschedule.model.MovieSchedule;
+import com.hwansol.moviego.movieschedule.model.MovieScheduleSeat;
+import com.hwansol.moviego.movieschedule.model.SeatStatus;
+import com.hwansol.moviego.movieschedule.repository.MovieScheduleRepository;
+import com.hwansol.moviego.movieschedule.repository.MovieScheduleSeatRepository;
+import com.hwansol.moviego.reservation.dto.ReservationCreateDto;
 import com.hwansol.moviego.reservation.dto.ReservationGetDto;
+import com.hwansol.moviego.reservation.exception.ReserveSeatException;
 import com.hwansol.moviego.reservation.model.Reservation;
 import com.hwansol.moviego.reservation.repository.ReservationRepository;
-import java.time.LocalDate;
-import java.util.Random;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +31,9 @@ public class ReservationService {
 
     private static int RESERVATION_SEQUENCE = 0;
     private final ReservationRepository reservationRepository;
+    private final MovieScheduleRepository movieScheduleRepository;
+    private final MovieScheduleSeatRepository movieScheduleSeatRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 예약 상세 조회 서비스
@@ -54,6 +66,47 @@ public class ReservationService {
         Page<Reservation> reservationList = reservationRepository.findAllWithMemberId(memberId, pageable);
 
         return reservationList.map(ReservationGetDto.SimpleResponse::from);
+    }
+
+    /**
+     * 예약 생성 서비스
+     *
+     * @param request         예약 생성 request
+     * @param movieScheduleId 영화 스케줄 pk
+     * @param memberId        회원 pk
+     * @return 생성된 예약 엔티티
+     */
+    @Transactional
+    public Reservation createReservation(ReservationCreateDto.Request request, Long movieScheduleId, String memberId) {
+        List<MovieScheduleSeat> movieScheduleSeatList = request.getMovieScheduleSeatIds().stream()
+                .map(l -> {
+                    MovieScheduleSeat movieScheduleSeat = movieScheduleSeatRepository.findById(l)
+                            .orElseThrow(NotFoundException::new);
+
+                    if (movieScheduleSeat.getSeatStatus().equals(SeatStatus.UNAVAILABLE)) {
+                        throw new ReserveSeatException(ErrorCode.ALREADY_RESERVED_SEAT);
+                    }
+
+                    return movieScheduleSeat;
+                })
+                .toList();
+
+        String reservationNum = createReservationNum();
+        Reservation reservation = request.toEntity(reservationNum);
+
+        MovieSchedule movieSchedule = movieScheduleRepository.findById(movieScheduleId)
+                .orElseThrow(NotFoundException::new);
+        Member member = memberRepository.findByUserId(memberId)
+                .orElseThrow(NotFoundException::new);
+
+        reservation.relatedMember(member);
+        reservation.relatedMovieSchedule(movieSchedule);
+        movieScheduleSeatList.forEach(ms -> {
+            ms.reserveSeat();
+            reservation.addMovieScheduleSeat(ms);
+        });
+
+        return reservationRepository.save(reservation);
     }
 
     // 예약 번호 생성 메서드
