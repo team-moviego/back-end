@@ -95,4 +95,13 @@ public class MovieScheduleSeat {
 
         this.seatStatus = SeatStatus.UNAVAILABLE;
     }
+
+    // 좌석 예약 취소 처리
+    public void cancelSeat() {
+        if (this.seatStatus.equals(SeatStatus.AVAILABLE)) {
+            throw new IllegalStateException("이미 취소 처리된 좌석입니다.");
+        }
+
+        this.seatStatus = SeatStatus.AVAILABLE;
+    }
 }
