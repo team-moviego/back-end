@@ -12,6 +12,7 @@ import com.hwansol.moviego.movieschedule.repository.MovieScheduleRepository;
 import com.hwansol.moviego.movieschedule.repository.MovieScheduleSeatRepository;
 import com.hwansol.moviego.reservation.dto.ReservationCreateDto;
 import com.hwansol.moviego.reservation.dto.ReservationGetDto;
+import com.hwansol.moviego.reservation.exception.ReservationCancelException;
 import com.hwansol.moviego.reservation.exception.ReserveSeatException;
 import com.hwansol.moviego.reservation.model.Reservation;
 import com.hwansol.moviego.reservation.repository.ReservationRepository;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservationService {
 
     private static int RESERVATION_SEQUENCE = 0;
+
     private final ReservationRepository reservationRepository;
     private final MovieScheduleRepository movieScheduleRepository;
     private final MovieScheduleSeatRepository movieScheduleSeatRepository;
@@ -67,6 +69,8 @@ public class ReservationService {
 
         return reservationList.map(ReservationGetDto.SimpleResponse::from);
     }
+
+    // todo: 결제 기능 및 락 추가
 
     /**
      * 예약 생성 서비스
@@ -107,6 +111,36 @@ public class ReservationService {
         });
 
         return reservationRepository.save(reservation);
+    }
+
+    // todo: 결제 취소 로직 추가
+
+    /**
+     * 예약 취소 서비스
+     * 본인인 경우에만 예약 취소 가능
+     * 상영 시간이 이미 지난 경우에는 취소 불가능
+     *
+     * @param reservationId 취소할 예약 pk
+     * @param memberId      예약 취소하는 회원 아이디
+     * @return 취소된 예약 엔티티
+     */
+    @Transactional
+    public Reservation cancelReservation(Long reservationId, String memberId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(NotFoundException::new);
+
+        if (!reservation.getMember().getUserId().equals(memberId)) {
+            throw new ReservationCancelException(ErrorCode.FORBIDDEN);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (reservation.getMovieSchedule().getStartDateTime().isEqual(now) || reservation.getMovieSchedule().getStartDateTime().isAfter(now)) {
+            throw new ReservationCancelException(ErrorCode.ALREADY_USED_RESERVATION);
+        }
+
+        reservation.cancelReservation();
+
+        return reservation;
     }
 
     // 예약 번호 생성 메서드
