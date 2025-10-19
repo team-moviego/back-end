@@ -111,10 +111,13 @@ public class Reservation extends BaseTImeEntity {
         this.movieScheduleSeats.add(movieScheduleSeat);
     }
 
+    // 예약 취소 처리
     public void cancelReservation() {
         if (this.reservationType.equals(ReservationType.CANCEL)) {
             throw new IllegalStateException("이미 취소된 예약입니다.");
         }
+
+        this.movieScheduleSeats.forEach(MovieScheduleSeat::cancelSeat);
 
         this.reservationType = ReservationType.CANCEL;
     }
