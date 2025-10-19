@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    ALREADY_USED_RESERVATION(HttpStatus.BAD_REQUEST.value(), "이미 상영 시간이거나 상영 시간이 지나 취소가 불가합니다."),
     ALREADY_RESERVED_SEAT(HttpStatus.BAD_REQUEST.value(), "이미 예약된 좌석입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN.value(), "권한이 없습니다."),
     FAIL_DELETE_BY_EXIST_MOVIE_SCHEDULE(HttpStatus.BAD_REQUEST.value(), "영화 스케줄이 존재하여 삭제할 수 없습니다."),
