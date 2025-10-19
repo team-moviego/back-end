@@ -134,7 +134,7 @@ public class ReservationService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        if (reservation.getMovieSchedule().getStartDateTime().isEqual(now) || reservation.getMovieSchedule().getStartDateTime().isAfter(now)) {
+        if (reservation.getMovieSchedule().getStartDateTime().isEqual(now) || reservation.getMovieSchedule().getStartDateTime().isBefore(now)) {
             throw new ReservationCancelException(ErrorCode.ALREADY_USED_RESERVATION);
         }
 
