@@ -82,4 +82,22 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    /**
+     * 예약 취소 컨트롤러
+     * 본인의 예약만 취소 가능
+     * 상영 시간이 이미 지난 예약의 경우 취소 불가능
+     *
+     * @param reservationId    취소할 예약의 pk
+     * @param principalDetails 예약 취소를 진행하는 회원의 principalDetails
+     * @return 성공 시 200 코드와 취소한 예약의 pk, 실패 시 에러코드와 에러메시지
+     */
+    @PostMapping("/reservation/{reservationId}")
+    public ResponseEntity<CommonDto.Response> cancelReservationController(@PathVariable Long reservationId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        String memberId = principalDetails.getUsername();
+        Reservation reservation = reservationService.cancelReservation(reservationId, memberId);
+        CommonDto.Response response = CommonDto.Response.from(reservation.getId());
+
+        return ResponseEntity.ok(response);
+    }
 }
