@@ -1,5 +1,6 @@
 package com.hwansol.moviego.movieschedule.model;
 
+import com.hwansol.moviego.reservation.model.Reservation;
 import com.hwansol.moviego.seat.model.Seat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,6 +40,10 @@ public class MovieScheduleSeat {
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservation_id", nullable = false)
+    private Reservation reservation;
+
     @Builder
     public MovieScheduleSeat(SeatStatus seatStatus) {
         if (seatStatus == null) {
@@ -70,6 +75,18 @@ public class MovieScheduleSeat {
         }
 
         this.seat = seat;
+    }
+
+    public void relatedReservation(Reservation reservation) {
+        if (this.reservation != null) {
+            throw new IllegalStateException("이미 연결된 상태입니다.");
+        }
+
+        if (reservation == null) {
+            throw new IllegalArgumentException("연관관계 연결 실패");
+        }
+
+        this.reservation = reservation;
     }
 
     // 좌석 예약 처리
