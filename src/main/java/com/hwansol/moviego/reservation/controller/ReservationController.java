@@ -73,7 +73,7 @@ public class ReservationController {
      * @param principalDetails 예약하는 회원의 principalDetails
      * @return 성공 시 201 코드와 생성된 예약 pk, 실패 시 에러코드와 에러메시지
      */
-    @PostMapping("/reservation/{movieScheduleId}")
+    @PostMapping("/reservation/movieSchedule/{movieScheduleId}")
     public ResponseEntity<CommonDto.Response> createReservationController(@Valid @RequestBody ReservationCreateDto.Request request, @PathVariable Long movieScheduleId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         String memberId = principalDetails.getUsername();
         Reservation reservation = reservationService.createReservation(request, movieScheduleId, memberId);
