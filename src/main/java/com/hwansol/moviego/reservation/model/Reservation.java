@@ -111,6 +111,14 @@ public class Reservation extends BaseTImeEntity {
         this.movieScheduleSeats.add(movieScheduleSeat);
     }
 
+    public void cancelReservation() {
+        if (this.reservationType.equals(ReservationType.CANCEL)) {
+            throw new IllegalStateException("이미 취소된 예약입니다.");
+        }
+
+        this.reservationType = ReservationType.CANCEL;
+    }
+
     public void softDelete() {
         if (this.deletedAt != null) {
             throw new IllegalStateException("이미 삭제된 엔티티입니다.");
